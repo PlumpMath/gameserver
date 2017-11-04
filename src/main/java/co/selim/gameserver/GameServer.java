@@ -1,14 +1,19 @@
 package co.selim.gameserver;
 
-import co.selim.gameserver.websocket.GameMovementHandler;
+import co.selim.gameserver.websocket.WebSocketHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.Spark;
 
 public class GameServer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameServer.class);
+
     public static void main(String[] args) {
-        Spark.port(8080);
+        int port = 8080;
+        LOGGER.info("Starting server on port " + port);
+        Spark.port(port);
 
-
-        Spark.webSocket("/api/movement/*", GameMovementHandler.class);
+        Spark.webSocket("/api/movement/*", WebSocketHandler.class);
 
         Spark.get("/api/movement/*", (req, res) -> {
             res.status(101);

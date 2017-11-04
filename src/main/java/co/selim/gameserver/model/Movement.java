@@ -1,7 +1,8 @@
 package co.selim.gameserver.model;
 
-public class Movement {
-    private int xDirection, yDirection;
+public class Movement implements GameAction {
+    private int xDirection;
+    private int yDirection;
 
     public int getxDirection() {
         return xDirection;

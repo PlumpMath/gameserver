@@ -2,10 +2,10 @@ package co.selim.gameserver.model;
 
 public class Coordinates {
     private final String type;
-    private final int x;
-    private final int y;
+    private final double x;
+    private final double y;
 
-    public Coordinates(String type, int x, int y) {
+    public Coordinates(String type, double x, double y) {
         this.type = type;
         this.x = x;
         this.y = y;
@@ -15,11 +15,11 @@ public class Coordinates {
         return type;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 }
