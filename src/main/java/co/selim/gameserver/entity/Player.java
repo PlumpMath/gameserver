@@ -6,10 +6,13 @@ import java.io.IOException;
 
 public class Player {
     private final Session session;
-    private int x = 960, y = 960;
+    private int x;
+    private int y;
 
     public Player(Session session) {
         this.session = session;
+        this.x = 960;
+        this.y = 960;
     }
 
     public void sendMessage(String message) {

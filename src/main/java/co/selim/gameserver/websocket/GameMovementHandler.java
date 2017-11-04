@@ -1,7 +1,7 @@
 package co.selim.gameserver.websocket;
 
-import co.selim.gameserver.Coordinates;
-import co.selim.gameserver.Movement;
+import co.selim.gameserver.model.Coordinates;
+import co.selim.gameserver.model.Movement;
 import co.selim.gameserver.entity.Player;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

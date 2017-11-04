@@ -1,4 +1,4 @@
-package co.selim.gameserver;
+package co.selim.gameserver.model;
 
 public class Movement {
     private int xDirection, yDirection;

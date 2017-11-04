@@ -1,8 +1,9 @@
-package co.selim.gameserver;
+package co.selim.gameserver.model;
 
 public class Coordinates {
-    private String type;
-    private int x, y;
+    private final String type;
+    private final int x;
+    private final int y;
 
     public Coordinates(String type, int x, int y) {
         this.type = type;
@@ -13,7 +14,6 @@ public class Coordinates {
     public String getType() {
         return type;
     }
-
 
     public int getX() {
         return x;
