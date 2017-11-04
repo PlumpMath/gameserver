@@ -2,6 +2,7 @@ package co.selim.gameserver.websocket;
 
 import co.selim.gameserver.entity.Player;
 import co.selim.gameserver.handlers.MovementHandler;
+import co.selim.gameserver.handlers.SnowballHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
@@ -30,6 +31,7 @@ public class WebSocketHandler {
 
     static {
         handlers.put("movePlayer", new MovementHandler());
+        handlers.put("throwBall", new SnowballHandler());
     }
 
     @OnWebSocketConnect

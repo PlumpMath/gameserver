@@ -35,4 +35,8 @@ public final class GameExecutor {
     public void submit(Runnable task) {
         tasks.add(task);
     }
+
+    public void cancel(Runnable task) {
+        tasks.remove(task);
+    }
 }

@@ -2,7 +2,7 @@ package co.selim.gameserver.entity;
 
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
-import co.selim.gameserver.model.Coordinates;
+import co.selim.gameserver.model.PlayerCoordinates;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ public class Player {
 
             moveDistance = 5;
             if (x != lastSentX || y != lastSentY) {
-                messenger.sendMessage(gson.toJson(new Coordinates("playerMoved", x, y)));
+                messenger.sendMessage(gson.toJson(new PlayerCoordinates(x, y)));
                 lastSentX = x;
                 lastSentY = y;
             }
@@ -67,6 +67,10 @@ public class Player {
 
         this.xDirection = xDirection;
         this.yDirection = yDirection;
+    }
+
+    public void throwSnowball(int pointerX, int pointerY) {
+        new Snowball(executor, messenger, x, y, pointerX, pointerY);
     }
 
     public void disconnect() {

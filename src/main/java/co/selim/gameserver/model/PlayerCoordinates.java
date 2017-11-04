@@ -1,12 +1,11 @@
 package co.selim.gameserver.model;
 
-public class Coordinates {
-    private final String type;
+public class PlayerCoordinates {
+    private final String type = "playerMoved";
     private final double x;
     private final double y;
 
-    public Coordinates(String type, double x, double y) {
-        this.type = type;
+    public PlayerCoordinates(double x, double y) {
         this.x = x;
         this.y = y;
     }
