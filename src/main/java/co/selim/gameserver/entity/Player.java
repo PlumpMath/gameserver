@@ -2,7 +2,7 @@ package co.selim.gameserver.entity;
 
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
-import co.selim.gameserver.model.PlayerCoordinates;
+import co.selim.gameserver.model.dto.outgoing.PlayerCoordinates;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;

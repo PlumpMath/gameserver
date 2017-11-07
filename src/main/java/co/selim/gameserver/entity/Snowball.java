@@ -2,7 +2,7 @@ package co.selim.gameserver.entity;
 
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
-import co.selim.gameserver.model.SnowballCoordinates;
+import co.selim.gameserver.model.dto.outgoing.SnowballCoordinates;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

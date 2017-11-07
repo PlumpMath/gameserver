@@ -1,4 +1,4 @@
-package co.selim.gameserver.model;
+package co.selim.gameserver.model.dto.incoming;
 
 public class MouseClick {
     private int pointerX;

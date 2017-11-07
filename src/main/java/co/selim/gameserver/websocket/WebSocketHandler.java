@@ -1,10 +1,9 @@
 package co.selim.gameserver.websocket;
 
 import co.selim.gameserver.entity.Player;
+import co.selim.gameserver.handlers.GameHandler;
 import co.selim.gameserver.handlers.MovementHandler;
 import co.selim.gameserver.handlers.SnowballHandler;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -23,15 +22,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @WebSocket
 public class WebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketHandler.class);
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting()
-            .create();
-    private static final Map<Session, Player> players = new ConcurrentHashMap<>();
-    private static final Map<String, co.selim.gameserver.handlers.GameHandler> handlers = new
+    private static final JsonParser JSON_PARSER = new JsonParser();
+    private static final Map<Session, Player> PLAYERS = new ConcurrentHashMap<>();
+    private static final Map<String, GameHandler> HANDLERS = new
             HashMap<>();
 
     static {
-        handlers.put("movePlayer", new MovementHandler());
-        handlers.put("throwBall", new SnowballHandler());
+        HANDLERS.put("movePlayer", new MovementHandler());
+        HANDLERS.put("throwBall", new SnowballHandler());
     }
 
     @OnWebSocketConnect
@@ -39,7 +37,7 @@ public class WebSocketHandler {
         String address = session.getRemoteAddress()
                 .getHostString();
         LOGGER.info(address + " connected");
-        players.put(session, new Player(address, (msg) -> {
+        PLAYERS.put(session, new Player(address, (msg) -> {
             try {
                 session.getRemote()
                         .sendString(msg);
@@ -55,25 +53,23 @@ public class WebSocketHandler {
     public void closed(Session session, int statusCode, String reason) {
         LOGGER.info(session.getRemoteAddress()
                 .getHostString() + " disconnected");
-        players.remove(session)
+        PLAYERS.remove(session)
                 .disconnect();
     }
 
     @OnWebSocketMessage
     public void message(Session session, String message) throws IOException {
-        Player player = players.get(session);
-
-        JsonParser jsonParser = new JsonParser();
+        Player player = PLAYERS.get(session);
 
         LOGGER.info("Received " + message + " from " + session.getRemoteAddress()
                 .getHostString());
 
-        String messageType = jsonParser.parse(message)
+        String messageType = JSON_PARSER.parse(message)
                 .getAsJsonObject()
                 .get("type")
                 .getAsString();
 
-        co.selim.gameserver.handlers.GameHandler handler = handlers.get(messageType);
+        co.selim.gameserver.handlers.GameHandler handler = HANDLERS.get(messageType);
         if (Objects.nonNull(handler)) {
             handler.handle(player, message);
         }

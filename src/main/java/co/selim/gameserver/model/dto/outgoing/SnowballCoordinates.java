@@ -1,4 +1,4 @@
-package co.selim.gameserver.model;
+package co.selim.gameserver.model.dto.outgoing;
 
 public class SnowballCoordinates {
     private final String type = "snowballChanged";

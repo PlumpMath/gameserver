@@ -1,7 +1,7 @@
 package co.selim.gameserver.handlers;
 
 import co.selim.gameserver.entity.Player;
-import co.selim.gameserver.model.Movement;
+import co.selim.gameserver.model.dto.incoming.Movement;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

@@ -1,6 +1,6 @@
-package co.selim.gameserver.model;
+package co.selim.gameserver.model.dto.incoming;
 
-public class Movement implements GameAction {
+public class Movement {
     private int xDirection;
     private int yDirection;
 

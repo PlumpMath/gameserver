@@ -1,4 +1,4 @@
-package co.selim.gameserver.model;
+package co.selim.gameserver.model.dto.outgoing;
 
 public class PlayerCoordinates {
     private final String type = "playerMoved";
