@@ -4,6 +4,7 @@ import co.selim.gameserver.entity.Player;
 import co.selim.gameserver.handlers.GameHandler;
 import co.selim.gameserver.handlers.MovementHandler;
 import co.selim.gameserver.handlers.SnowballHandler;
+import co.selim.gameserver.model.GameMap;
 import com.google.gson.JsonParser;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -26,6 +27,7 @@ public class WebSocketHandler {
     private static final Map<Session, Player> PLAYERS = new ConcurrentHashMap<>();
     private static final Map<String, GameHandler> HANDLERS = new
             HashMap<>();
+    private static final GameMap MAP = new GameMap();
 
     static {
         HANDLERS.put("movePlayer", new MovementHandler());
@@ -37,7 +39,7 @@ public class WebSocketHandler {
         String address = session.getRemoteAddress()
                 .getHostString();
         LOGGER.info(address + " connected");
-        PLAYERS.put(session, new Player(address, (msg) -> {
+        PLAYERS.put(session, new Player(address, MAP.getWorld(), (msg) -> {
             try {
                 session.getRemote()
                         .sendString(msg);

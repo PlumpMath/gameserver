@@ -2,12 +2,12 @@ package co.selim.gameserver.model.dto.outgoing;
 
 public class SnowballCoordinates {
     private final String type = "snowballChanged";
-    private final double x;
-    private final double y;
+    private final float x;
+    private final float y;
     private boolean deleted;
     private String id;
 
-    public SnowballCoordinates(double x, double y, boolean deleted, String id) {
+    public SnowballCoordinates(float x, float y, boolean deleted, String id) {
         this.x = x;
         this.y = y;
         this.deleted = deleted;
@@ -18,11 +18,11 @@ public class SnowballCoordinates {
         return type;
     }
 
-    public double getX() {
+    public float getX() {
         return x;
     }
 
-    public double getY() {
+    public float getY() {
         return y;
     }
 

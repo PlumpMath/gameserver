@@ -11,20 +11,20 @@ public class Snowball {
             .create();
     private final GameExecutor executor;
     private final Messenger messenger;
-    private double x;
-    private double y;
+    private float x;
+    private float y;
 
-    private double moveDistance = 15;
+    private float moveDistance = 15;
 
-    public Snowball(GameExecutor executor, Messenger messenger, double playerX, double playerY,
+    public Snowball(GameExecutor executor, Messenger messenger, float playerX, float playerY,
                     int pointerX, int pointerY) {
         this.executor = executor;
         this.messenger = messenger;
 
-        double xLength = pointerX - playerX;
-        double yLength = pointerY - playerY;
+        float xLength = pointerX - playerX;
+        float yLength = pointerY - playerY;
 
-        double angle = Math.atan(xLength / yLength);
+        float angle = (float) Math.atan(xLength / yLength);
 
         this.x = playerX;
         this.y = playerY;
@@ -34,22 +34,22 @@ public class Snowball {
 
             messenger.sendMessage(gson.toJson(new SnowballCoordinates(x, y, false, String.valueOf
                     (hashCode()))));
-        });
+        }, () -> x < 0 || x > 2000 || y < 0 || y > 2000);
     }
 
-    public double getX() {
+    public float getX() {
         return x;
     }
 
-    public void setX(double x) {
+    public void setX(float x) {
         this.x = x;
     }
 
-    public double getY() {
+    public float getY() {
         return y;
     }
 
-    public void setY(double y) {
+    public void setY(float y) {
         this.y = y;
     }
 }

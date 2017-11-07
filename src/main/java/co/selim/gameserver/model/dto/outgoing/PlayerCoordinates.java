@@ -2,10 +2,10 @@ package co.selim.gameserver.model.dto.outgoing;
 
 public class PlayerCoordinates {
     private final String type = "playerMoved";
-    private final double x;
-    private final double y;
+    private final float x;
+    private final float y;
 
-    public PlayerCoordinates(double x, double y) {
+    public PlayerCoordinates(float x, float y) {
         this.x = x;
         this.y = y;
     }
@@ -14,11 +14,11 @@ public class PlayerCoordinates {
         return type;
     }
 
-    public double getX() {
+    public float getX() {
         return x;
     }
 
-    public double getY() {
+    public float getY() {
         return y;
     }
 }

@@ -3,6 +3,12 @@ package co.selim.gameserver.entity;
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
 import co.selim.gameserver.model.dto.outgoing.PlayerCoordinates;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
@@ -11,13 +17,11 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Player {
-    private final Logger logger = LoggerFactory.getLogger(Player.class);
+    private final Logger logger;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting()
             .create();
     private final GameExecutor executor;
     private Messenger messenger;
-    private double x;
-    private double y;
 
     private int xDirection;
     private int yDirection;
@@ -25,38 +29,64 @@ public class Player {
     private boolean movingX;
     private boolean movingY;
 
-    private double moveDistance;
+    private float moveDistance;
     private volatile AtomicBoolean connected = new AtomicBoolean(true);
 
-    private double lastSentX;
-    private double lastSentY;
+    private float lastSentX;
+    private float lastSentY;
 
-    public Player(String address, Messenger messenger) {
+    private Body body;
+
+    public Player(String address, World world, Messenger messenger) {
+        logger = LoggerFactory.getLogger("Player " + address);
         executor = new GameExecutor("Player + " + address + "-UpdateExecutor", connected);
         this.messenger = messenger;
 
-        this.x = 960;
-        this.y = 960;
+        float x = 960;
+        float y = 960;
 
-        this.moveDistance = 5;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.position.set(x, y);
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        float halfSize = 32;
+        EdgeShape edgeShape = new EdgeShape();
+        edgeShape.set(-halfSize, -halfSize, halfSize, halfSize);
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = edgeShape;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0;
+        fixtureDef.restitution = 0;
+        body = world.createBody(bodyDef);
+        body.createFixture(fixtureDef);
 
-        executor.submit(() -> {
+        this.moveDistance = 50;
+
+        executor.submitConnectionBoundTask(() -> {
+            Vector2 velocity = body.getLinearVelocity();
+
             if (movingX && movingY) {
                 moveDistance *= Math.cos(Math.PI / 4);
             }
 
             if (movingX) {
-                x += xDirection * moveDistance;
+                velocity.x = xDirection * moveDistance;
+            } else {
+                velocity.x = 0;
             }
             if (movingY) {
-                y += yDirection * moveDistance;
+                velocity.y = yDirection * moveDistance;
+            } else {
+                velocity.y = 0;
             }
 
-            moveDistance = 5;
-            if (x != lastSentX || y != lastSentY) {
-                messenger.sendMessage(gson.toJson(new PlayerCoordinates(x, y)));
-                lastSentX = x;
-                lastSentY = y;
+            body.setLinearVelocity(velocity);
+            moveDistance = 50;
+
+            Vector2 bodyPosition = body.getPosition();
+            if (bodyPosition.x != lastSentX || bodyPosition.y != lastSentY) {
+                messenger.sendMessage(gson.toJson(new PlayerCoordinates(bodyPosition.x, bodyPosition.y)));
+                lastSentX = bodyPosition.x;
+                lastSentY = bodyPosition.y;
             }
         });
     }
@@ -70,26 +100,10 @@ public class Player {
     }
 
     public void throwSnowball(int pointerX, int pointerY) {
-        new Snowball(executor, messenger, x, y, pointerX, pointerY);
+        new Snowball(executor, messenger, body.getPosition().x, body.getPosition().y, pointerX, pointerY);
     }
 
     public void disconnect() {
         connected.set(false);
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
     }
 }
