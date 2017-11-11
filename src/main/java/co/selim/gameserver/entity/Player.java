@@ -7,14 +7,16 @@ import co.selim.gameserver.model.dto.outgoing.PlayerCoordinates;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Player {
+import static co.selim.gameserver.model.GameMap.MAP_SIZE;
+
+public class Player implements GameEntity {
     private final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
     private static short nCount;
@@ -40,18 +42,18 @@ public class Player {
 
     public Player(String address, GameMap map, Messenger messenger) {
         this.GROUP_INDEX = --nCount;
-        executor = new GameExecutor("Player + " + address + "-UpdateExecutor");
+        executor = new GameExecutor("Player-" + address + "-UpdateExecutor");
         this.messenger = messenger;
 
-        float x = 960;
-        float y = 960;
+        float x = MAP_SIZE.x / 2;
+        float y = MAP_SIZE.y / 2;
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.position.set(x, y);
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        float halfSize = 32;
-        EdgeShape edgeShape = new EdgeShape();
-        edgeShape.set(-halfSize, -halfSize, halfSize, halfSize);
+        float halfSize = 24;
+        PolygonShape edgeShape = new PolygonShape();
+        edgeShape.setAsBox(halfSize, halfSize);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = edgeShape;
         fixtureDef.density = 0.5f;
@@ -60,6 +62,7 @@ public class Player {
         fixtureDef.filter.groupIndex = GROUP_INDEX;
         body = map.createBody(bodyDef);
         body.createFixture(fixtureDef);
+        body.setUserData(this);
         this.map = map;
 
         this.moveDistance = 15;
@@ -109,6 +112,17 @@ public class Player {
     }
 
     public void disconnect() {
+        destroy();
         executor.stop();
+    }
+
+    @Override
+    public void destroy() {
+        map.destroyBody(body);
+    }
+
+    @Override
+    public void collided(GameEntity other) {
+        LOGGER.info("Player collided");
     }
 }

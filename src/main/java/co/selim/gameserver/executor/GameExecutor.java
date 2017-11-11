@@ -64,6 +64,10 @@ public final class GameExecutor {
         tasks.add(gameTask);
     }
 
+    public void submitOnce(Runnable task) {
+        submit(task, () -> true);
+    }
+
     /**
      * Schedules a task that should only be stopped when a player disconnects.
      *
