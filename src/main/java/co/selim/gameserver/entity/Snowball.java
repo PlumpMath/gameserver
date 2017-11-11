@@ -3,53 +3,63 @@ package co.selim.gameserver.entity;
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
 import co.selim.gameserver.model.dto.outgoing.SnowballCoordinates;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.util.function.Supplier;
 
 public class Snowball {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting()
             .create();
     private final GameExecutor executor;
     private final Messenger messenger;
-    private float x;
-    private float y;
 
-    private float moveDistance = 15;
+    private float moveDistance = 45;
 
-    public Snowball(GameExecutor executor, Messenger messenger, float playerX, float playerY,
-                    int pointerX, int pointerY) {
+    private Body body;
+
+    public Snowball(GameExecutor executor, Messenger messenger, World world, short groupIndex,
+                    float playerX, float playerY, int pointerX, int pointerY) {
         this.executor = executor;
         this.messenger = messenger;
 
-        float xLength = pointerX - playerX;
-        float yLength = pointerY - playerY;
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.position.set(playerX, playerY);
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        CircleShape circleShape = new CircleShape();
+        circleShape.setRadius(8);
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = circleShape;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0;
+        fixtureDef.restitution = 0;
+        fixtureDef.filter.groupIndex = groupIndex;
+        body = world.createBody(bodyDef);
+        body.createFixture(fixtureDef);
 
-        float angle = (float) Math.atan(xLength / yLength);
+        float angle = MathUtils.atan2(pointerY - playerY, pointerX - playerX);
 
-        this.x = playerX;
-        this.y = playerY;
+        Vector2 velocity = new Vector2(MathUtils.cos(angle) * moveDistance, MathUtils.sin(angle)
+                * moveDistance);
+        body.setLinearVelocity(velocity);
+
         executor.submit(() -> {
-            x += moveDistance * Math.sin(angle);
-            y += moveDistance * Math.cos(angle);
-
-            messenger.sendMessage(gson.toJson(new SnowballCoordinates(x, y, false, String.valueOf
-                    (hashCode()))));
-        }, () -> x < 0 || x > 2000 || y < 0 || y > 2000);
+            Vector2 snowballPosition = body.getPosition();
+            messenger.sendMessage(gson.toJson(new SnowballCoordinates(snowballPosition.x,
+                    snowballPosition.y, didHit().get(), String.valueOf(hashCode()))));
+        }, didHit());
     }
 
-    public float getX() {
-        return x;
-    }
-
-    public void setX(float x) {
-        this.x = x;
-    }
-
-    public float getY() {
-        return y;
-    }
-
-    public void setY(float y) {
-        this.y = y;
+    private Supplier<Boolean> didHit() {
+        Vector2 pos = body.getPosition();
+        return () -> pos.x < 0 || pos.x > 2000 || pos.y < 0 || pos.y > 2000;
     }
 }

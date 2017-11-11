@@ -14,7 +14,7 @@ public class GameMap {
             while (true) {
                 world.step(1.0f / 60.0f, 6, 3);
                 try {
-                    Thread.sleep(1000L);
+                    Thread.sleep(2L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

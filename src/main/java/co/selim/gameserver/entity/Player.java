@@ -17,11 +17,12 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Player {
-    private final Logger logger;
+    private static short nCount;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting()
             .create();
     private final GameExecutor executor;
     private Messenger messenger;
+    private final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
     private int xDirection;
     private int yDirection;
@@ -36,9 +37,11 @@ public class Player {
     private float lastSentY;
 
     private Body body;
+    private final World world;
+    private final short GROUP_INDEX;
 
     public Player(String address, World world, Messenger messenger) {
-        logger = LoggerFactory.getLogger("Player " + address);
+        this.GROUP_INDEX = --nCount;
         executor = new GameExecutor("Player + " + address + "-UpdateExecutor", connected);
         this.messenger = messenger;
 
@@ -56,10 +59,12 @@ public class Player {
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0;
         fixtureDef.restitution = 0;
+        fixtureDef.filter.groupIndex = GROUP_INDEX;
         body = world.createBody(bodyDef);
         body.createFixture(fixtureDef);
+        this.world = world;
 
-        this.moveDistance = 50;
+        this.moveDistance = 15;
 
         executor.submitConnectionBoundTask(() -> {
             Vector2 velocity = body.getLinearVelocity();
@@ -80,7 +85,7 @@ public class Player {
             }
 
             body.setLinearVelocity(velocity);
-            moveDistance = 50;
+            moveDistance = 15;
 
             Vector2 bodyPosition = body.getPosition();
             if (bodyPosition.x != lastSentX || bodyPosition.y != lastSentY) {
@@ -100,7 +105,8 @@ public class Player {
     }
 
     public void throwSnowball(int pointerX, int pointerY) {
-        new Snowball(executor, messenger, body.getPosition().x, body.getPosition().y, pointerX, pointerY);
+        new Snowball(executor, messenger, world, GROUP_INDEX, body.getPosition().x, body
+                .getPosition().y, pointerX, pointerY);
     }
 
     public void disconnect() {

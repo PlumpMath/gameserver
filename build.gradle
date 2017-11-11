@@ -12,10 +12,6 @@ version = '1.0'
 sourceCompatibility = '1.8'
 mainClassName = 'co.selim.gameserver.GameServer'
 
-def vertxVersion = '3.4.2'
-def watchForChange = 'src/**/*'
-def doOnChange = './gradlew classes'
-
 dependencies {
     compile "com.sparkjava:spark-core:2.7.0"
     compile "com.google.code.gson:gson:2.8.2"
