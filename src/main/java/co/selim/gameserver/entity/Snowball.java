@@ -2,6 +2,7 @@ package co.selim.gameserver.entity;
 
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
+import co.selim.gameserver.model.GameMap;
 import co.selim.gameserver.model.dto.outgoing.SnowballCoordinates;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -26,7 +27,7 @@ public class Snowball {
 
     private Body body;
 
-    public Snowball(GameExecutor executor, Messenger messenger, World world, short groupIndex,
+    public Snowball(GameExecutor executor, Messenger messenger, GameMap map, short groupIndex,
                     float playerX, float playerY, int pointerX, int pointerY) {
         this.executor = executor;
         this.messenger = messenger;
@@ -42,7 +43,7 @@ public class Snowball {
         fixtureDef.friction = 0;
         fixtureDef.restitution = 0;
         fixtureDef.filter.groupIndex = groupIndex;
-        body = world.createBody(bodyDef);
+        body = map.createBody(bodyDef);
         body.createFixture(fixtureDef);
 
         float angle = MathUtils.atan2(pointerY - playerY, pointerX - playerX);

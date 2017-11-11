@@ -39,7 +39,7 @@ public class WebSocketHandler {
         String address = session.getRemoteAddress()
                 .getHostString();
         LOGGER.info(address + " connected");
-        PLAYERS.put(session, new Player(address, MAP.getWorld(), (msg) -> {
+        PLAYERS.put(session, new Player(address, MAP, (msg) -> {
             try {
                 session.getRemote()
                         .sendString(msg);

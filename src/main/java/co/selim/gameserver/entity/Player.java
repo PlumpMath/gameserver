@@ -2,27 +2,26 @@ package co.selim.gameserver.entity;
 
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
+import co.selim.gameserver.model.GameMap;
 import co.selim.gameserver.model.dto.outgoing.PlayerCoordinates;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.World;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class Player {
+    private final Logger LOGGER = LoggerFactory.getLogger(Player.class);
+
     private static short nCount;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting()
             .create();
     private final GameExecutor executor;
     private Messenger messenger;
-    private final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
     private int xDirection;
     private int yDirection;
@@ -31,18 +30,17 @@ public class Player {
     private boolean movingY;
 
     private float moveDistance;
-    private volatile AtomicBoolean connected = new AtomicBoolean(true);
 
     private float lastSentX;
     private float lastSentY;
 
     private Body body;
-    private final World world;
+    private final GameMap map;
     private final short GROUP_INDEX;
 
-    public Player(String address, World world, Messenger messenger) {
+    public Player(String address, GameMap map, Messenger messenger) {
         this.GROUP_INDEX = --nCount;
-        executor = new GameExecutor("Player + " + address + "-UpdateExecutor", connected);
+        executor = new GameExecutor("Player + " + address + "-UpdateExecutor");
         this.messenger = messenger;
 
         float x = 960;
@@ -60,9 +58,9 @@ public class Player {
         fixtureDef.friction = 0;
         fixtureDef.restitution = 0;
         fixtureDef.filter.groupIndex = GROUP_INDEX;
-        body = world.createBody(bodyDef);
+        body = map.createBody(bodyDef);
         body.createFixture(fixtureDef);
-        this.world = world;
+        this.map = map;
 
         this.moveDistance = 15;
 
@@ -89,7 +87,8 @@ public class Player {
 
             Vector2 bodyPosition = body.getPosition();
             if (bodyPosition.x != lastSentX || bodyPosition.y != lastSentY) {
-                messenger.sendMessage(gson.toJson(new PlayerCoordinates(bodyPosition.x, bodyPosition.y)));
+                messenger.sendMessage(gson.toJson(new PlayerCoordinates(bodyPosition.x,
+                        bodyPosition.y)));
                 lastSentX = bodyPosition.x;
                 lastSentY = bodyPosition.y;
             }
@@ -105,11 +104,11 @@ public class Player {
     }
 
     public void throwSnowball(int pointerX, int pointerY) {
-        new Snowball(executor, messenger, world, GROUP_INDEX, body.getPosition().x, body
+        new Snowball(executor, messenger, map, GROUP_INDEX, body.getPosition().x, body
                 .getPosition().y, pointerX, pointerY);
     }
 
     public void disconnect() {
-        connected.set(false);
+        executor.stop();
     }
 }

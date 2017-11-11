@@ -3,28 +3,26 @@ package co.selim.gameserver.executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public final class GameExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameExecutor.class);
-    private final String name;
-    private volatile AtomicBoolean connected;
-    private final Set<GameTask> tasks = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    public GameExecutor(String name, AtomicBoolean connected) {
+    private final String name;
+    private final Set<GameTask> tasks = ConcurrentHashMap.newKeySet();
+    private volatile boolean connected = true;
+
+    public GameExecutor(String name) {
         this.name = name;
-        this.connected = connected;
         start();
     }
 
     private void start() {
         new Thread(() -> {
-            while (connected.get()) {
+            while (connected) {
                 for (Runnable task : tasks) {
                     task.run();
                 }
@@ -36,6 +34,10 @@ public final class GameExecutor {
                 }
             }
         }, name).start();
+    }
+
+    public void stop() {
+        connected = false;
     }
 
     private void cleanFinishedTasks() {
