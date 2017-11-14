@@ -133,6 +133,11 @@ public class GameMap {
                     public void collided(GameEntity other) {
                         LOGGER.info("Someone collided with a wall");
                     }
+
+                    @Override
+                    public Type getType() {
+                        return Type.OBSTACLE;
+                    }
                 });
     }
 }
