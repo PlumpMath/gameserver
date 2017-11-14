@@ -88,4 +88,9 @@ public class Snowball implements GameEntity {
     public void collided(GameEntity other) {
         LOGGER.info("Snowball collided");
     }
+
+    @Override
+    public Type getType() {
+        return Type.SNOWBALL;
+    }
 }

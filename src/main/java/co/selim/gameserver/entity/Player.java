@@ -3,7 +3,9 @@ package co.selim.gameserver.entity;
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
 import co.selim.gameserver.model.GameMap;
-import co.selim.gameserver.model.dto.outgoing.PlayerCoordinates;
+import co.selim.gameserver.model.dto.outgoing.PlayerMoved;
+import co.selim.gameserver.model.dto.outgoing.PlayerStopped;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -33,12 +35,11 @@ public class Player implements GameEntity {
 
     private float moveDistance;
 
-    private float lastSentX;
-    private float lastSentY;
-
     private Body body;
     private final GameMap map;
     private final short GROUP_INDEX;
+
+    private volatile Vector2 lastVelocity = new Vector2();
 
     public Player(String address, GameMap map, Messenger messenger) {
         this.GROUP_INDEX = --nCount;
@@ -85,15 +86,20 @@ public class Player implements GameEntity {
                 velocity.y = 0;
             }
 
+            Vector2 bodyPosition = body.getPosition();
+
+            if (!movingX && !movingY) {
+                messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPosition.x, bodyPosition.y)));
+            }
+
             body.setLinearVelocity(velocity);
             moveDistance = 15;
 
-            Vector2 bodyPosition = body.getPosition();
-            if (bodyPosition.x != lastSentX || bodyPosition.y != lastSentY) {
-                messenger.sendMessage(gson.toJson(new PlayerCoordinates(bodyPosition.x,
-                        bodyPosition.y)));
-                lastSentX = bodyPosition.x;
-                lastSentY = bodyPosition.y;
+            float angle = MathUtils.atan2(velocity.y - bodyPosition.y, velocity.x - bodyPosition.x);
+
+            if (!lastVelocity.epsilonEquals(body.getLinearVelocity())) {
+                messenger.sendMessage(gson.toJson(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle, moveDistance)));
+                lastVelocity.set(body.getLinearVelocity());
             }
         });
     }
@@ -123,6 +129,17 @@ public class Player implements GameEntity {
 
     @Override
     public void collided(GameEntity other) {
-        LOGGER.info("Player collided");
+        if (other.getType().equals(Type.OBSTACLE) && (!movingX && !movingY)) {
+            LOGGER.info("Player collided with obstacle and not moving diagonally, sending stop");
+            executor.submitOnce(() -> {
+                Vector2 bodyPos = body.getPosition();
+                messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPos.x, bodyPos.y)));
+            });
+        }
+    }
+
+    @Override
+    public Type getType() {
+        return Type.PLAYER;
     }
 }
