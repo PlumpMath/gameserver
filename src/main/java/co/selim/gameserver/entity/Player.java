@@ -41,6 +41,9 @@ public class Player implements GameEntity {
 
     private volatile Vector2 lastVelocity = new Vector2();
 
+    private String name;
+    private String skin;
+
     public Player(String address, GameMap map, Messenger messenger) {
         this.GROUP_INDEX = --nCount;
         executor = new GameExecutor("Player-" + address + "-UpdateExecutor");
@@ -120,6 +123,28 @@ public class Player implements GameEntity {
     public void disconnect() {
         destroy();
         executor.stop();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSkin() {
+        return skin;
+    }
+
+    public void setSkin(String skin) {
+        this.skin = skin;
+    }
+
+    public void sendMessage(String message) {
+        executor.submitOnce(() -> {
+            messenger.sendMessage(message);
+        });
     }
 
     @Override

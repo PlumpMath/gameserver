@@ -1,6 +1,7 @@
 package co.selim.gameserver.websocket;
 
 import co.selim.gameserver.entity.Player;
+import co.selim.gameserver.handlers.ConnectionHandler;
 import co.selim.gameserver.handlers.GameHandler;
 import co.selim.gameserver.handlers.MovementHandler;
 import co.selim.gameserver.handlers.SnowballHandler;
@@ -32,6 +33,7 @@ public class WebSocketHandler {
     static {
         HANDLERS.put("movePlayer", new MovementHandler());
         HANDLERS.put("throwBall", new SnowballHandler());
+        HANDLERS.put("connectToGame", new ConnectionHandler());
     }
 
     @OnWebSocketConnect

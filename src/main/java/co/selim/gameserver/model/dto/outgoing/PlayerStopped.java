@@ -9,16 +9,4 @@ public class PlayerStopped {
         this.x = x;
         this.y = y;
     }
-
-    public String getType() {
-        return type;
-    }
-
-    public float getX() {
-        return x;
-    }
-
-    public float getY() {
-        return y;
-    }
 }

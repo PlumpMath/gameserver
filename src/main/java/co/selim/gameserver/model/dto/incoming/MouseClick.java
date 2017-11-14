@@ -8,15 +8,7 @@ public class MouseClick {
         return pointerX;
     }
 
-    public void setPointerX(int pointerX) {
-        this.pointerX = pointerX;
-    }
-
     public int getPointerY() {
         return pointerY;
-    }
-
-    public void setPointerY(int pointerY) {
-        this.pointerY = pointerY;
     }
 }
