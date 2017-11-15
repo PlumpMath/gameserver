@@ -91,7 +91,7 @@ public class Player implements GameEntity {
 
             Vector2 bodyPosition = body.getPosition();
 
-            if (!movingX && !movingY) {
+            if (velocity.isZero()) {
                 messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPosition.x, bodyPosition.y)));
             }
 
