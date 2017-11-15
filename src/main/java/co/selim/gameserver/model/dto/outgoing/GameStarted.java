@@ -1,6 +1,7 @@
 package co.selim.gameserver.model.dto.outgoing;
 
 public class GameStarted {
+    private String type ="gameStarted";
     private float width;
     private float height;
     private String playerName;
