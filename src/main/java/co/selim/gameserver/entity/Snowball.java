@@ -81,12 +81,16 @@ public class Snowball implements GameEntity {
 
     @Override
     public void destroy() {
+        destroyed = true;
         map.destroyBody(body);
     }
 
     @Override
     public void collided(GameEntity other) {
-        LOGGER.info("Snowball collided");
+        destroy();
+        if(other.getType() == Type.PLAYER) {
+            LOGGER.info("Player was hit by snowball");
+        }
     }
 
     @Override
