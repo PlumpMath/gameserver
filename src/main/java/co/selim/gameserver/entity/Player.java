@@ -105,6 +105,9 @@ public class Player implements GameEntity {
                 lastVelocity.set(body.getLinearVelocity());
             }
         });
+        executor.submitOnce(() -> {
+            messenger.sendMessage(gson.toJson(new PlayerStopped(body.getPosition().x, body.getPosition().y)));
+        });
     }
 
     public void move(int xDirection, int yDirection) {
