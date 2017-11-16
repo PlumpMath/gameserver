@@ -44,4 +44,8 @@ public class WebSocketMessenger implements Messenger {
             }
         }
     }
+
+    public void removeSession(Session s) {
+        ALL_SESSIONS.remove(s);
+    }
 }
