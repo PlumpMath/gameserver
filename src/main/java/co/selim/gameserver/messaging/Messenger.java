@@ -1,5 +1,7 @@
 package co.selim.gameserver.messaging;
 
 public interface Messenger {
-    void sendMessage(String message);
+    void sendMessage(Object obj);
+
+    void broadCast(Object obj);
 }

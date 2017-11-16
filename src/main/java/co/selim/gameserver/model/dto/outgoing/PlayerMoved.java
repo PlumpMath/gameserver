@@ -6,11 +6,13 @@ public class PlayerMoved {
     private final float y;
     private final float angle;
     private final float velocity;
+    private final String id;
 
-    public PlayerMoved(float x, float y, float angle, float velocity) {
+    public PlayerMoved(float x, float y, float angle, float velocity, String id) {
         this.x = x;
         this.y = y;
         this.angle = angle;
         this.velocity = velocity;
+        this.id = id;
     }
 }

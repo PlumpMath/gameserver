@@ -6,11 +6,13 @@ public class GameStarted {
     private float height;
     private String playerName;
     private String skin;
+    private String id;
 
-    public GameStarted(float width, float height, String playerName, String skin) {
+    public GameStarted(float width, float height, String playerName, String skin, String id) {
         this.width = width;
         this.height = height;
         this.playerName = playerName;
         this.skin = skin;
+        this.id = id;
     }
 }

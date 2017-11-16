@@ -16,6 +16,8 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 import static co.selim.gameserver.model.GameMap.MAP_SIZE;
 
 public class Player implements GameEntity {
@@ -25,6 +27,7 @@ public class Player implements GameEntity {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting()
             .create();
     private final GameExecutor executor;
+    private final String id;
     private Messenger messenger;
 
     private int xDirection;
@@ -46,6 +49,7 @@ public class Player implements GameEntity {
 
     public Player(String address, GameMap map, Messenger messenger) {
         this.GROUP_INDEX = --nCount;
+        this.id = UUID.randomUUID().toString();
         executor = new GameExecutor("Player-" + address + "-UpdateExecutor");
         this.messenger = messenger;
 
@@ -92,7 +96,7 @@ public class Player implements GameEntity {
             Vector2 bodyPosition = body.getPosition();
 
             if (!lastVelocity.epsilonEquals(velocity) && velocity.isZero()) {
-                messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPosition.x, bodyPosition.y)));
+                messenger.sendMessage(new PlayerStopped(bodyPosition.x, bodyPosition.y, getId()));
                 lastVelocity.set(velocity);
             }
 
@@ -103,7 +107,7 @@ public class Player implements GameEntity {
 
             if (!lastVelocity.epsilonEquals(velocity)) {
                 LOGGER.info("sending angle {}", angle);
-                messenger.sendMessage(gson.toJson(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle, moveDistance)));
+                messenger.sendMessage(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle, moveDistance, getId()));
                 lastVelocity.set(velocity);
             }
         });
@@ -147,9 +151,9 @@ public class Player implements GameEntity {
         this.skin = skin;
     }
 
-    public void sendMessage(String message) {
+    public void broadCastMessage(Object obj) {
         executor.submitOnce(() -> {
-            messenger.sendMessage(message);
+            messenger.broadCast(obj);
         });
     }
 
@@ -164,9 +168,13 @@ public class Player implements GameEntity {
             LOGGER.info("Player collided with obstacle and not moving diagonally, sending stop");
             executor.submitOnce(() -> {
                 Vector2 bodyPos = body.getPosition();
-                messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPos.x, bodyPos.y)));
+                messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPos.x, bodyPos.y, getId())));
             });
         }
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Override
