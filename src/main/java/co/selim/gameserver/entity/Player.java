@@ -24,8 +24,6 @@ public class Player implements GameEntity {
     private final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
     private static short nCount;
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting()
-            .create();
     private final GameExecutor executor;
     private final String id;
     private Messenger messenger;
@@ -96,7 +94,7 @@ public class Player implements GameEntity {
             Vector2 bodyPosition = body.getPosition();
 
             if (!lastVelocity.epsilonEquals(velocity) && velocity.isZero()) {
-                messenger.sendMessage(new PlayerStopped(bodyPosition.x, bodyPosition.y, getId()));
+                messenger.broadCast(new PlayerStopped(bodyPosition.x, bodyPosition.y, getId()));
                 lastVelocity.set(velocity);
             }
 
@@ -106,8 +104,7 @@ public class Player implements GameEntity {
             float angle = MathUtils.atan2(velocity.y, velocity.x);
 
             if (!lastVelocity.epsilonEquals(velocity)) {
-                LOGGER.info("sending angle {}", angle);
-                messenger.sendMessage(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle, moveDistance, getId()));
+                messenger.broadCast(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle, moveDistance, getId()));
                 lastVelocity.set(velocity);
             }
         });
@@ -168,7 +165,7 @@ public class Player implements GameEntity {
             LOGGER.info("Player collided with obstacle and not moving diagonally, sending stop");
             executor.submitOnce(() -> {
                 Vector2 bodyPos = body.getPosition();
-                messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPos.x, bodyPos.y, getId())));
+                messenger.broadCast(new PlayerStopped(bodyPos.x, bodyPos.y, getId()));
             });
         }
     }

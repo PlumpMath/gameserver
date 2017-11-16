@@ -21,10 +21,10 @@ import java.util.function.Function;
 
 public class GameMap {
     public static final Vector2 MAP_SIZE = new Vector2(1024, 1024);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameMap.class);
 
     private final World world;
     private final ReentrantLock lock = new ReentrantLock();
-    Logger LOGGER = LoggerFactory.getLogger(GameMap.class);
 
     public GameMap() {
         Vector2 gravity = new Vector2(0, 0);

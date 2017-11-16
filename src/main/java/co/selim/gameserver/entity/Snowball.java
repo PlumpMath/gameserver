@@ -10,8 +10,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +18,6 @@ import static co.selim.gameserver.model.GameMap.MAP_SIZE;
 public class Snowball implements GameEntity {
     private static final Logger LOGGER = LoggerFactory.getLogger(Snowball.class);
 
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting()
-            .create();
     private final GameExecutor executor;
     private final Messenger messenger;
     private final GameMap map;
@@ -61,7 +57,7 @@ public class Snowball implements GameEntity {
 
         executor.submitOnce(() -> {
             Vector2 snowballPosition = body.getPosition();
-            messenger.sendMessage(gson.toJson(new SnowballCoordinates(snowballPosition.x, snowballPosition.y, angle, moveDistance, false, String.valueOf(hashCode()))));
+            messenger.broadCast(new SnowballCoordinates(snowballPosition.x, snowballPosition.y, angle, moveDistance, false, String.valueOf(hashCode())));
         });
 
         executor.submit(() -> {
@@ -71,16 +67,16 @@ public class Snowball implements GameEntity {
                 destroy();
                 LOGGER.info("Destroyed snowball with ID " + hashCode());
                 Vector2 snowballPosition = body.getPosition();
-                messenger.sendMessage(gson.toJson(new SnowballCoordinates(snowballPosition.x,
+                messenger.broadCast(new SnowballCoordinates(snowballPosition.x,
                         snowballPosition.y, angle, moveDistance, true, String.valueOf(hashCode())
-                )));
+                ));
             }
         }, () -> destroyed);
     }
 
     @Override
     public void destroy() {
-        if(!destroyed) {
+        if (!destroyed) {
             destroyed = true;
             map.destroyBody(body);
         }
@@ -89,7 +85,7 @@ public class Snowball implements GameEntity {
     @Override
     public void collided(GameEntity other) {
         destroy();
-        if(other.getType() == Type.PLAYER) {
+        if (other.getType() == Type.PLAYER) {
             LOGGER.info("Player was hit by snowball");
         }
     }
