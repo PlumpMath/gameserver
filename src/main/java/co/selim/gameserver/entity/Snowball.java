@@ -68,8 +68,7 @@ public class Snowball implements GameEntity {
             Vector2 pos = body.getPosition();
             if (!destroyed && (pos.x < 0 || pos.x > MAP_SIZE.x || pos.y < 0 || pos.y > MAP_SIZE
                     .y)) {
-                map.destroyBody(body);
-                destroyed = true;
+                destroy();
                 LOGGER.info("Destroyed snowball with ID " + hashCode());
                 Vector2 snowballPosition = body.getPosition();
                 messenger.sendMessage(gson.toJson(new SnowballCoordinates(snowballPosition.x,
@@ -81,8 +80,10 @@ public class Snowball implements GameEntity {
 
     @Override
     public void destroy() {
-        destroyed = true;
-        map.destroyBody(body);
+        if(!destroyed) {
+            destroyed = true;
+            map.destroyBody(body);
+        }
     }
 
     @Override

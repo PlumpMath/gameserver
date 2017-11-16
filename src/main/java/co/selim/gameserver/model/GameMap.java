@@ -47,8 +47,9 @@ public class GameMap {
                         .getBody()
                         .getUserData();
 
-                a.collided(b);
-                b.collided(a);
+                // TODO: fix native CME
+                //a.collided(b);
+                //b.collided(a);
             }
 
             @Override
@@ -111,6 +112,7 @@ public class GameMap {
     }
 
     private void createWall(float x, float y, float w, float h) {
+        // TODO: fix wall coordinates
         BodyDef bodyDef = new BodyDef();
         bodyDef.position.set(x - w / 2, y - h / 2);
         bodyDef.type = BodyDef.BodyType.StaticBody;

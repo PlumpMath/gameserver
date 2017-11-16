@@ -72,7 +72,7 @@ public class Player implements GameEntity {
         this.moveDistance = 15;
 
         executor.submitConnectionBoundTask(() -> {
-            Vector2 velocity = body.getLinearVelocity();
+            Vector2 velocity = new Vector2();
 
             if (movingX && movingY) {
                 moveDistance *= Math.cos(Math.PI / 4);
@@ -91,18 +91,20 @@ public class Player implements GameEntity {
 
             Vector2 bodyPosition = body.getPosition();
 
-            if (!body.getLinearVelocity().isZero() && velocity.isZero()) {
+            if (!lastVelocity.epsilonEquals(velocity) && velocity.isZero()) {
                 messenger.sendMessage(gson.toJson(new PlayerStopped(bodyPosition.x, bodyPosition.y)));
+                lastVelocity.set(velocity);
             }
 
             body.setLinearVelocity(velocity);
             moveDistance = 15;
 
-            float angle = MathUtils.atan2(velocity.y - bodyPosition.y, velocity.x - bodyPosition.x);
+            float angle = MathUtils.atan2(velocity.y, velocity.x);
 
-            if (!lastVelocity.epsilonEquals(body.getLinearVelocity())) {
+            if (!lastVelocity.epsilonEquals(velocity)) {
+                LOGGER.info("sending angle {}", angle);
                 messenger.sendMessage(gson.toJson(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle, moveDistance)));
-                lastVelocity.set(body.getLinearVelocity());
+                lastVelocity.set(velocity);
             }
         });
     }
