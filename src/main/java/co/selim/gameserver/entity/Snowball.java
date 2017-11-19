@@ -27,7 +27,7 @@ public class Snowball implements GameEntity {
     private float angle;
 
     private Body body;
-    private boolean destroyed;
+    private volatile boolean destroyed;
 
     public Snowball(GameExecutor executor, Messenger messenger, GameMap map, short groupIndex, Player myPlayer, int pointerX, int pointerY) {
         this.map = map;
@@ -66,7 +66,7 @@ public class Snowball implements GameEntity {
             if (!destroyed && (pos.x < 0 || pos.x > MAP_SIZE.x || pos.y < 0 || pos.y > MAP_SIZE
                     .y)) {
                 destroy();
-                LOGGER.info("Destroyed snowball with ID " + hashCode());
+                LOGGER.info("Destroyed snowball with ID {}", hashCode());
                 Vector2 snowballPosition = body.getPosition();
                 messenger.broadCast(new SnowballCoordinates(snowballPosition.x, snowballPosition
                         .y, angle, moveDistance, true, String.valueOf(hashCode())));

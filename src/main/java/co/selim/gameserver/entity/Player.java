@@ -47,6 +47,8 @@ public class Player implements GameEntity {
     private String skin;
     private int score;
 
+    private volatile boolean connected;
+
     public Player(Session session, String address, GameMap map, Messenger messenger) {
         this.session = session;
         this.GROUP_INDEX = --nCount;
@@ -128,6 +130,7 @@ public class Player implements GameEntity {
     }
 
     public void disconnect() {
+        connected = false;
         destroy();
         executor.stop();
     }
@@ -197,6 +200,7 @@ public class Player implements GameEntity {
 
     public void setGameStarted() {
         this.gameStarted = true;
+        this.connected = true;
     }
 
     @Override
@@ -210,5 +214,9 @@ public class Player implements GameEntity {
 
     public Session getSession() {
         return session;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 }

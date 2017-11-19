@@ -16,7 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,5 +75,9 @@ public class WebSocketHandler {
         if (Objects.nonNull(handler)) {
             handler.handle(player, message);
         }
+    }
+
+    public static Collection<Player> getAllPlayers() {
+        return PLAYERS.values();
     }
 }
