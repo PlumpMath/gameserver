@@ -23,26 +23,27 @@ public class WebSocketMessenger implements Messenger {
         ALL_SESSIONS.add(session);
     }
 
+    private static void doSendMessage(Session s, Object obj) {
+        try {
+            s.getRemote()
+                    .sendString(GSON.toJson(obj));
+        } catch (IOException e) {
+            if (s.isOpen()) {
+                LOGGER.error("Error while sending message", e);
+            }
+        }
+    }
+
     @Override
     public void sendMessage(Object obj) {
-        doSendMessage(obj);
+        doSendMessage(session, obj);
     }
 
     @Override
     public void broadCast(Object obj) {
         ALL_SESSIONS.forEach(s -> {
-            doSendMessage(obj);
+            doSendMessage(s, obj);
         });
-    }
-
-    private void doSendMessage(Object obj) {
-        try {
-            session.getRemote().sendString(GSON.toJson(obj));
-        } catch (IOException e) {
-            if (session.isOpen()) {
-                LOGGER.error("Error while sending message", e);
-            }
-        }
     }
 
     public void removeSession(Session s) {

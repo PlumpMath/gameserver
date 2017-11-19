@@ -11,8 +11,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +24,7 @@ public class Player implements GameEntity {
     private static short nCount;
     private final GameExecutor executor;
     private final String id;
+    private volatile boolean gameStarted;
     private Messenger messenger;
 
     private int xDirection;
@@ -44,10 +43,12 @@ public class Player implements GameEntity {
 
     private String name;
     private String skin;
+    private int score;
 
     public Player(String address, GameMap map, Messenger messenger) {
         this.GROUP_INDEX = --nCount;
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID()
+                .toString();
         executor = new GameExecutor("Player-" + address + "-UpdateExecutor");
         this.messenger = messenger;
 
@@ -93,7 +94,7 @@ public class Player implements GameEntity {
 
             Vector2 bodyPosition = body.getPosition();
 
-            if (!lastVelocity.epsilonEquals(velocity) && velocity.isZero()) {
+            if (gameStarted && !lastVelocity.epsilonEquals(velocity) && velocity.isZero()) {
                 messenger.broadCast(new PlayerStopped(bodyPosition.x, bodyPosition.y, getId()));
                 lastVelocity.set(velocity);
             }
@@ -104,7 +105,8 @@ public class Player implements GameEntity {
             float angle = MathUtils.atan2(velocity.y, velocity.x);
 
             if (!lastVelocity.epsilonEquals(velocity)) {
-                messenger.broadCast(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle, moveDistance, getId()));
+                messenger.broadCast(new PlayerMoved(bodyPosition.x, bodyPosition.y, angle,
+                        moveDistance, getId()));
                 lastVelocity.set(velocity);
             }
         });
@@ -154,6 +156,12 @@ public class Player implements GameEntity {
         });
     }
 
+    public void sendMessage(Object obj) {
+        executor.submitOnce(() -> {
+            messenger.sendMessage(obj);
+        });
+    }
+
     @Override
     public void destroy() {
         map.destroyBody(body);
@@ -161,7 +169,8 @@ public class Player implements GameEntity {
 
     @Override
     public void collided(GameEntity other) {
-        if (other.getType().equals(Type.OBSTACLE) && (!movingX && !movingY)) {
+        if (other.getType()
+                .equals(Type.OBSTACLE) && (!movingX && !movingY)) {
             LOGGER.info("Player collided with obstacle and not moving diagonally, sending stop");
             executor.submitOnce(() -> {
                 Vector2 bodyPos = body.getPosition();
@@ -172,6 +181,14 @@ public class Player implements GameEntity {
 
     public String getId() {
         return id;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setGameStarted() {
+        this.gameStarted = true;
     }
 
     @Override

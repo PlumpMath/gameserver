@@ -18,8 +18,9 @@ public class ConnectionHandler implements GameHandler {
         ConnectionRequest request = GSON.fromJson(message, ConnectionRequest.class);
         player.setName(request.getPlayerName());
         player.setSkin(request.getSkin());
-        player.broadCastMessage(new GameStarted(GameMap.MAP_SIZE.x, GameMap.MAP_SIZE.y,
+        player.sendMessage(new GameStarted(GameMap.MAP_SIZE.x, GameMap.MAP_SIZE.y,
                 player.getName(), player.getSkin(), player.getId()));
+        player.setGameStarted();
         Vector2 position = player.getPosition();
         player.broadCastMessage(new PlayerStopped(position.x, position.y, player.getId()));
     }

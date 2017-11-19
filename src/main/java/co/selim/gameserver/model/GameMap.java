@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -15,6 +14,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,6 +26,7 @@ public class GameMap {
 
     private final World world;
     private final ReentrantLock lock = new ReentrantLock();
+    private final Set<Body> bodiesToRemove = ConcurrentHashMap.newKeySet();
 
     public GameMap() {
         Vector2 gravity = new Vector2(0, 0);
@@ -48,8 +50,8 @@ public class GameMap {
                         .getUserData();
 
                 // TODO: fix native CME
-                //a.collided(b);
-                //b.collided(a);
+                a.collided(b);
+                b.collided(a);
             }
 
             @Override
@@ -73,6 +75,8 @@ public class GameMap {
                 try {
                     lock.lock();
                     world.step(1.0f / 60.0f, 6, 3);
+                    bodiesToRemove.forEach(world::destroyBody);
+                    bodiesToRemove.clear();
                 } finally {
                     lock.unlock();
                 }
@@ -90,16 +94,7 @@ public class GameMap {
     }
 
     public void destroyBody(Body body) {
-        doInsideLock(world -> world.destroyBody(body));
-    }
-
-    private void doInsideLock(Consumer<World> consumer) {
-        try {
-            lock.lock();
-            consumer.accept(world);
-        } finally {
-            lock.unlock();
-        }
+        bodiesToRemove.add(body);
     }
 
     private Body getInsideLock(Function<World, Body> function) {
