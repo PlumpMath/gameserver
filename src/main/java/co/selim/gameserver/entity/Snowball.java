@@ -63,8 +63,8 @@ public class Snowball implements GameEntity {
 
         executor.submit(() -> {
             Vector2 pos = body.getPosition();
-            if (!destroyed && (pos.x < 0 || pos.x > MAP_SIZE.x || pos.y < 0 || pos.y > MAP_SIZE
-                    .y)) {
+            if (destroyed || (!destroyed && (pos.x < 0 || pos.x > MAP_SIZE.x || pos.y < 0 || pos
+                    .y > MAP_SIZE.y))) {
                 destroy();
                 LOGGER.info("Destroyed snowball with ID {}", hashCode());
                 Vector2 snowballPosition = body.getPosition();

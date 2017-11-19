@@ -7,5 +7,5 @@ public interface Messenger {
 
     void broadCast(Object obj);
 
-    void broadCastToOthers(Player player, Object obj);
+    void broadCastToOthers(Object obj);
 }

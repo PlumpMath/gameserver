@@ -132,7 +132,7 @@ public class Player implements GameEntity {
 
     public void disconnect() {
         executor.submitOnce(() -> {
-            messenger.broadCastToOthers(this, new PlayerDisconnected(getId()));
+            messenger.broadCastToOthers(new PlayerDisconnected(getId()));
             connected = false;
             destroy();
             executor.stop();
@@ -167,7 +167,7 @@ public class Player implements GameEntity {
 
     public void broadCastToOthers(Object obj) {
         executor.submitOnce(() -> {
-            messenger.broadCastToOthers(this, obj);
+            messenger.broadCastToOthers(obj);
         });
     }
 
