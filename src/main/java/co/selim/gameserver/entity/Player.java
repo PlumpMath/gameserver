@@ -3,6 +3,7 @@ package co.selim.gameserver.entity;
 import co.selim.gameserver.executor.GameExecutor;
 import co.selim.gameserver.messaging.Messenger;
 import co.selim.gameserver.model.GameMap;
+import co.selim.gameserver.model.dto.outgoing.PlayerDisconnected;
 import co.selim.gameserver.model.dto.outgoing.PlayerMoved;
 import co.selim.gameserver.model.dto.outgoing.PlayerStopped;
 import com.badlogic.gdx.math.MathUtils;
@@ -130,9 +131,12 @@ public class Player implements GameEntity {
     }
 
     public void disconnect() {
-        connected = false;
-        destroy();
-        executor.stop();
+        executor.submitOnce(() -> {
+            messenger.broadCastToOthers(this, new PlayerDisconnected(getId()));
+            connected = false;
+            destroy();
+            executor.stop();
+        });
     }
 
     public Vector2 getPosition() {
