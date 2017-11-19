@@ -42,7 +42,7 @@ public class WebSocketHandler {
                 .getHostString();
         LOGGER.info(address + " connected");
         WebSocketMessenger messenger = new WebSocketMessenger(session);
-        Player player = new Player(address, MAP, messenger);
+        Player player = new Player(session, address, MAP, messenger);
         PLAYERS.put(session, player);
         MESSENGERS.put(session, messenger);
     }

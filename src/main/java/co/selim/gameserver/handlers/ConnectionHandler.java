@@ -4,7 +4,7 @@ import co.selim.gameserver.entity.Player;
 import co.selim.gameserver.model.GameMap;
 import co.selim.gameserver.model.dto.incoming.ConnectionRequest;
 import co.selim.gameserver.model.dto.outgoing.GameStarted;
-import co.selim.gameserver.model.dto.outgoing.PlayerStopped;
+import co.selim.gameserver.model.dto.outgoing.PlayerConnected;
 import com.badlogic.gdx.math.Vector2;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,10 +18,11 @@ public class ConnectionHandler implements GameHandler {
         ConnectionRequest request = GSON.fromJson(message, ConnectionRequest.class);
         player.setName(request.getPlayerName());
         player.setSkin(request.getSkin());
-        player.sendMessage(new GameStarted(GameMap.MAP_SIZE.x, GameMap.MAP_SIZE.y,
-                player.getName(), player.getSkin(), player.getId()));
+        player.sendMessage(new GameStarted(GameMap.MAP_SIZE.x, GameMap.MAP_SIZE.y, player.getName
+                (), player.getSkin(), player.getId()));
         player.setGameStarted();
         Vector2 position = player.getPosition();
-        player.broadCastMessage(new PlayerStopped(position.x, position.y, player.getId()));
+        player.broadCastToOthers(new PlayerConnected(player.getId(), position.x, position.y,
+                player.getSkin(), player.getName()));
     }
 }

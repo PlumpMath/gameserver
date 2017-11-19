@@ -1,5 +1,6 @@
 package co.selim.gameserver.websocket;
 
+import co.selim.gameserver.entity.Player;
 import co.selim.gameserver.messaging.Messenger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -44,6 +45,15 @@ public class WebSocketMessenger implements Messenger {
         ALL_SESSIONS.forEach(s -> {
             doSendMessage(s, obj);
         });
+    }
+
+    @Override
+    public void broadCastToOthers(Player player, Object obj) {
+        ALL_SESSIONS.stream()
+                .filter(s -> !s.equals(player.getSession()))
+                .forEach(s -> {
+                    doSendMessage(s, obj);
+                });
     }
 
     public void removeSession(Session s) {

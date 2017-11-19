@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import org.eclipse.jetty.websocket.api.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ public class Player implements GameEntity {
     private static short nCount;
     private final GameExecutor executor;
     private final String id;
+    private final Session session;
     private volatile boolean gameStarted;
     private Messenger messenger;
 
@@ -45,7 +47,8 @@ public class Player implements GameEntity {
     private String skin;
     private int score;
 
-    public Player(String address, GameMap map, Messenger messenger) {
+    public Player(Session session, String address, GameMap map, Messenger messenger) {
+        this.session = session;
         this.GROUP_INDEX = --nCount;
         this.id = UUID.randomUUID()
                 .toString();
@@ -121,8 +124,7 @@ public class Player implements GameEntity {
     }
 
     public void throwSnowball(int pointerX, int pointerY) {
-        new Snowball(executor, messenger, map, GROUP_INDEX, body.getPosition().x, body
-                .getPosition().y, pointerX, pointerY);
+        new Snowball(executor, messenger, map, GROUP_INDEX, this, pointerX, pointerY);
     }
 
     public void disconnect() {
@@ -156,6 +158,12 @@ public class Player implements GameEntity {
         });
     }
 
+    public void broadCastToOthers(Object obj) {
+        executor.submitOnce(() -> {
+            messenger.broadCastToOthers(this, obj);
+        });
+    }
+
     public void sendMessage(Object obj) {
         executor.submitOnce(() -> {
             messenger.sendMessage(obj);
@@ -183,8 +191,8 @@ public class Player implements GameEntity {
         return id;
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public void changeScore(int score) {
+        this.score += score;
     }
 
     public void setGameStarted() {
@@ -194,5 +202,13 @@ public class Player implements GameEntity {
     @Override
     public Type getType() {
         return Type.PLAYER;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }
