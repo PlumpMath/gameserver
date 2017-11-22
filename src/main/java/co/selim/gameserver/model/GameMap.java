@@ -29,6 +29,9 @@ public class GameMap {
     private final ReentrantLock lock = new ReentrantLock();
     private final Set<Body> bodiesToRemove = ConcurrentHashMap.newKeySet();
     private static final Set<Tree> trees = new HashSet<>();
+    private static final float STEP_TIME = 1f / 60f;
+    private static long lastUpdateTimestamp;
+    private static float accumulator;
 
     public GameMap() {
         Vector2 gravity = new Vector2(0, 0);
@@ -79,7 +82,12 @@ public class GameMap {
             while (true) {
                 try {
                     lock.lock();
-                    world.step(1.0f / 60.0f, 6, 3);
+                    float delta = calculateAndGetDeltaTime();
+                    accumulator += Math.min(delta, 0.25f);
+                    while (accumulator >= STEP_TIME) {
+                        accumulator -= STEP_TIME;
+                        world.step(STEP_TIME, 6, 3);
+                    }
                     bodiesToRemove.forEach(world::destroyBody);
                     bodiesToRemove.clear();
                 } finally {
@@ -166,5 +174,12 @@ public class GameMap {
                 .getBody()
                 .setUserData(treeEntity);
         trees.add(treeEntity);
+    }
+
+    private static float calculateAndGetDeltaTime() {
+        long now = System.nanoTime();
+        long delta = now - lastUpdateTimestamp;
+        lastUpdateTimestamp = now;
+        return delta / 1_000_000_000.0f;
     }
 }
