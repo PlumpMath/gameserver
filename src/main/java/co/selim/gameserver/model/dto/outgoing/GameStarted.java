@@ -1,6 +1,9 @@
 package co.selim.gameserver.model.dto.outgoing;
 
 import co.selim.gameserver.entity.Player;
+import co.selim.gameserver.entity.Tree;
+import co.selim.gameserver.model.GameMap;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +17,7 @@ public class GameStarted {
     private final String skin;
     private final String id;
     private final List<PlayerInfo> playersInfo;
+    private final List<TreeInfo> treesInfo;
 
     public GameStarted(float width, float height, Player player, Collection<Player> otherPlayers) {
         this.width = width;
@@ -26,6 +30,11 @@ public class GameStarted {
                 .filter(Player::isConnected)
                 .map(p -> new PlayerInfo(p.getPosition().x, p.getPosition().y, p.getName(), p
                         .getId(), p.getSkin()))
+                .collect(Collectors.toList());
+        treesInfo = GameMap.getTrees()
+                .stream()
+                .map(t -> new TreeInfo(t.getPosition(), t.getTreeType()
+                        .getSize(), t.getTreeType()))
                 .collect(Collectors.toList());
     }
 
@@ -42,6 +51,23 @@ public class GameStarted {
             this.name = name;
             this.id = id;
             this.skin = skin;
+        }
+    }
+
+    private static class TreeInfo {
+        private final float x;
+        private final float y;
+        private final float width;
+        private final float height;
+        private final String type;
+
+        public TreeInfo(Vector2 pos, Vector2 size, Tree.TreeType type) {
+            this.x = pos.x;
+            this.y = pos.y;
+            this.width = size.x;
+            this.height = size.y;
+            this.type = type.name()
+                    .toLowerCase();
         }
     }
 }

@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class WebSocketMessenger implements Messenger {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketMessenger.class);
-    private static final BlockingQueue<Object> pendingMessages = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Object> pendingMessages = new LinkedBlockingQueue<>();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting()
             .create();
     private final Session session;
@@ -39,8 +39,10 @@ public class WebSocketMessenger implements Messenger {
 
     private static void doSendMessage(Session s, Object obj) {
         try {
-            s.getRemote()
-                    .sendString(GSON.toJson(obj));
+            if (s.isOpen()) {
+                s.getRemote()
+                        .sendString(GSON.toJson(obj));
+            }
         } catch (IOException e) {
             if (s.isOpen()) {
                 LOGGER.error("Error while sending message", e);

@@ -2,7 +2,7 @@ package co.selim.gameserver.entity;
 
 public interface GameEntity {
     enum Type {
-        PLAYER, SNOWBALL, OBSTACLE
+        PLAYER, SNOWBALL, WALL, TREE
     }
 
     void destroy();

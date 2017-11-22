@@ -185,7 +185,7 @@ public class Player implements GameEntity {
     @Override
     public void collided(GameEntity other) {
         if (other.getType()
-                .equals(Type.OBSTACLE) && (!movingX && !movingY)) {
+                .equals(Type.WALL) && (!movingX && !movingY)) {
             LOGGER.info("Player collided with obstacle and not moving diagonally, sending stop");
             executor.submitOnce(() -> {
                 Vector2 bodyPos = body.getPosition();
