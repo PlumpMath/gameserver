@@ -6,6 +6,7 @@ import co.selim.gameserver.model.GameMap;
 import co.selim.gameserver.model.dto.outgoing.PlayerDisconnected;
 import co.selim.gameserver.model.dto.outgoing.PlayerMoved;
 import co.selim.gameserver.model.dto.outgoing.PlayerStopped;
+import co.selim.gameserver.model.dto.outgoing.SnowballCount;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static co.selim.gameserver.model.GameMap.MAP_SIZE;
 
@@ -49,7 +51,10 @@ public class Player implements GameEntity {
     private int score;
 
     private volatile boolean connected;
-    private volatile int snowballCount = 5;
+    private final int MAX_SNOWBALLS = 5;
+    private volatile AtomicInteger snowballCount = new AtomicInteger(5);
+    private volatile long snowballTimestamp = System.nanoTime();
+    private volatile long timer;
 
     public Player(Session session, String address, GameMap map, Messenger messenger) {
         this.session = session;
@@ -116,6 +121,18 @@ public class Player implements GameEntity {
                         moveDistance, getId()));
                 lastVelocity.set(velocity);
             }
+
+            if (snowballCount.get() < MAX_SNOWBALLS) {
+                long now = System.nanoTime();
+                long delta = now / 1_000_000_000 - snowballTimestamp / 1_000_000_000;
+                timer += delta;
+                snowballTimestamp = now;
+
+                if (timer > 1) {
+                    setSnowballCount(1);
+                    timer = 0;
+                }
+            }
         });
     }
 
@@ -128,7 +145,20 @@ public class Player implements GameEntity {
     }
 
     public void throwSnowball(int pointerX, int pointerY) {
-        new Snowball(executor, messenger, map, GROUP_INDEX, this, pointerX, pointerY);
+        setSnowballCount(-1);
+        if (snowballCount.get() > 0) {
+            new Snowball(executor, messenger, map, GROUP_INDEX, this, pointerX, pointerY);
+        }
+    }
+
+    private void setSnowballCount(int delta) {
+        if (snowballCount.get() == 0 && delta == -1) {
+            return;
+        }
+        snowballCount.addAndGet(delta);
+        executor.submitOnce(() -> {
+            messenger.sendMessage(new SnowballCount(snowballCount.get()));
+        });
     }
 
     public void disconnect() {

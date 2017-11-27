@@ -18,7 +18,7 @@ public class GameStarted {
     private final String skin;
     private final String id;
     private final List<PlayerInfo> playersInfo;
-    private final List<TreeInfo> treesInfo;
+    private final List<TreeInfo> trees;
 
     public GameStarted(float width, float height, Player player, Collection<Player> otherPlayers) {
         this.width = width;
@@ -32,7 +32,7 @@ public class GameStarted {
                 .map(p -> new PlayerInfo(p.getPosition().x, p.getPosition().y, p.getName(), p
                         .getId(), p.getSkin()))
                 .collect(Collectors.toList());
-        treesInfo = GameMap.getTrees()
+        trees = GameMap.getTrees()
                 .stream()
                 .map(t -> new TreeInfo(t.getPosition(), t.getTreeType()
                         .getSize(), t.getTreeType()))
