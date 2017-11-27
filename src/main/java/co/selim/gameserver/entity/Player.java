@@ -49,6 +49,7 @@ public class Player implements GameEntity {
     private int score;
 
     private volatile boolean connected;
+    private volatile int snowballCount = 5;
 
     public Player(Session session, String address, GameMap map, Messenger messenger) {
         this.session = session;
@@ -88,12 +89,12 @@ public class Player implements GameEntity {
             }
 
             if (movingX) {
-                velocity.x = xDirection * moveDistance;
+                velocity.x = xDirection * moveDistance * GameMap.PPM;
             } else {
                 velocity.x = 0;
             }
             if (movingY) {
-                velocity.y = yDirection * moveDistance;
+                velocity.y = yDirection * moveDistance * GameMap.PPM;
             } else {
                 velocity.y = 0;
             }

@@ -23,15 +23,14 @@ import java.util.function.Function;
 
 public class GameMap {
     public static final Vector2 MAP_SIZE = new Vector2(1024, 768);
+    public static final float PPM = 8;
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMap.class);
 
     private final World world;
     private final ReentrantLock lock = new ReentrantLock();
     private final Set<Body> bodiesToRemove = ConcurrentHashMap.newKeySet();
     private static final Set<Tree> trees = new HashSet<>();
-    private static final float STEP_TIME = 1f / 60f;
-    private static long lastUpdateTimestamp;
-    private static float accumulator;
+    private volatile long lastUpdate = System.nanoTime();
 
     public GameMap() {
         Vector2 gravity = new Vector2(0, 0);
@@ -82,20 +81,20 @@ public class GameMap {
             while (true) {
                 try {
                     lock.lock();
-                    float delta = calculateAndGetDeltaTime();
-                    accumulator += Math.min(delta, 0.25f);
-                    while (accumulator >= STEP_TIME) {
-                        accumulator -= STEP_TIME;
-                        world.step(STEP_TIME, 6, 3);
-                    }
+                    long now = System.nanoTime();
+                    long delta = now - lastUpdate;
+                    float deltaS = delta / 1_000_000_000f;
+                    lastUpdate = now;
+                    world.step(deltaS, 6, 3);
+
                     bodiesToRemove.forEach(world::destroyBody);
                     bodiesToRemove.clear();
                 } finally {
                     lock.unlock();
                 }
                 try {
-                    Thread.sleep(2L);
-                } catch (InterruptedException e) {
+                    Thread.sleep(15L);
+                } catch (Exception e) {
                     break;
                 }
             }
@@ -174,12 +173,5 @@ public class GameMap {
                 .getBody()
                 .setUserData(treeEntity);
         trees.add(treeEntity);
-    }
-
-    private static float calculateAndGetDeltaTime() {
-        long now = System.nanoTime();
-        long delta = now - lastUpdateTimestamp;
-        lastUpdateTimestamp = now;
-        return delta / 1_000_000_000.0f;
     }
 }

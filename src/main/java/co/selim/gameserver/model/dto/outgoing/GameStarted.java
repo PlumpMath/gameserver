@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class GameStarted {
     private final String type = "gameStarted";
+    private final int maxSnowballs = 5;
     private final float width;
     private final float height;
     private final String playerName;

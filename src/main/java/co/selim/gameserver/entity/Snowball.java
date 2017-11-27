@@ -59,8 +59,8 @@ public class Snowball implements GameEntity {
         this.angle = MathUtils.atan2(pointerY - myPlayer.getPosition().y, pointerX - myPlayer
                 .getPosition().x);
 
-        Vector2 velocity = new Vector2(MathUtils.cos(angle) * moveDistance, MathUtils.sin(angle)
-                * moveDistance);
+        Vector2 velocity = new Vector2(MathUtils.cos(angle) * moveDistance * GameMap.PPM, MathUtils.sin(angle)
+                * moveDistance * GameMap.PPM);
         body.setLinearVelocity(velocity);
 
         executor.submitOnce(() -> {
@@ -73,7 +73,7 @@ public class Snowball implements GameEntity {
             if (destroyed || (!destroyed && (pos.x < 0 || pos.x > MAP_SIZE.x || pos.y < 0 || pos
                     .y > MAP_SIZE.y))) {
                 destroy();
-                LOGGER.info("Destroyed snowball with ID {}", hashCode());
+                LOGGER.info("Destroyed snowball with ID {}", id);
                 Vector2 snowballPosition = body.getPosition();
                 messenger.broadCast(new SnowballCoordinates(snowballPosition.x, snowballPosition.y, angle, moveDistance, true, id));
             }
