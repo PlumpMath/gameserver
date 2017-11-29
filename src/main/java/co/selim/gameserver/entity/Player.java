@@ -255,4 +255,8 @@ public class Player implements GameEntity {
     public boolean isConnected() {
         return connected;
     }
+
+    public short getGroupIndex() {
+        return GROUP_INDEX;
+    }
 }
