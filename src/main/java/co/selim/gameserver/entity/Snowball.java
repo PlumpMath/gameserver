@@ -24,6 +24,7 @@ public class Snowball implements GameEntity {
 
     private final GameMap map;
     private final Player myPlayer;
+    private final short groupIndex;
 
     private float moveDistance = 45;
     private float angle;
@@ -48,6 +49,7 @@ public class Snowball implements GameEntity {
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0;
         fixtureDef.restitution = 0;
+        this.groupIndex = groupIndex;
         fixtureDef.filter.groupIndex = groupIndex;
         this.body = map.createBody(bodyDef);
         map.doInLock(() -> {
@@ -92,7 +94,14 @@ public class Snowball implements GameEntity {
 
     @Override
     public void collided(GameEntity other) {
-        destroy();
+        if (other.getType() == Type.SNOWBALL) {
+            // for the unlikely event that we collide with a snowball by the same owner
+            if (((Snowball) other).groupIndex != groupIndex) {
+                destroy();
+            }
+        } else {
+            destroy();
+        }
         if (other.getType() == Type.PLAYER) {
             LOGGER.info("Player was hit by snowball");
             Player player = (Player) other;
