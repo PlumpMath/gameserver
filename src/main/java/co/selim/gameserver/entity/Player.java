@@ -80,8 +80,10 @@ public class Player implements GameEntity {
         fixtureDef.restitution = 0;
         fixtureDef.filter.groupIndex = GROUP_INDEX;
         body = map.createBody(bodyDef);
-        body.createFixture(fixtureDef);
-        body.setUserData(this);
+        map.doInLock(() -> {
+            body.createFixture(fixtureDef);
+            body.setUserData(this);
+        });
         this.map = map;
 
         this.moveDistance = 15;

@@ -50,8 +50,10 @@ public class Snowball implements GameEntity {
         fixtureDef.restitution = 0;
         fixtureDef.filter.groupIndex = groupIndex;
         this.body = map.createBody(bodyDef);
-        body.setUserData(this);
-        body.createFixture(fixtureDef);
+        map.doInLock(() -> {
+            body.setUserData(this);
+            body.createFixture(fixtureDef);
+        });
 
         this.id = UUID.randomUUID()
                 .toString();

@@ -93,7 +93,7 @@ public class GameMap {
                     lock.unlock();
                 }
                 try {
-                    Thread.sleep(15L);
+                    Thread.sleep(1L);
                 } catch (Exception e) {
                     break;
                 }
@@ -113,6 +113,15 @@ public class GameMap {
         try {
             lock.lock();
             return function.apply(world);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void doInLock(Runnable task) {
+        try {
+            lock.lock();
+            task.run();
         } finally {
             lock.unlock();
         }
