@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public final class GameExecutor {
@@ -65,7 +66,24 @@ public final class GameExecutor {
     }
 
     public void submitOnce(Runnable task) {
-        submit(task, () -> true);
+        GameTask gameTask = new GameTask() {
+            volatile boolean executed;
+
+            @Override
+            public boolean isDone() {
+                return executed;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    task.run();
+                } finally {
+                    executed = true;
+                }
+            }
+        };
+        tasks.add(gameTask);
     }
 
     /**
