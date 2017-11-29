@@ -19,11 +19,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static co.selim.gameserver.model.GameMap.MAP_SIZE;
 
 public class Player implements GameEntity {
     private final Logger LOGGER = LoggerFactory.getLogger(Player.class);
+
+    private static final int SNOWBALL_COOLDOWN = 1000;
 
     private static short nCount;
     private final GameExecutor executor;
@@ -53,8 +56,8 @@ public class Player implements GameEntity {
     private volatile boolean connected;
     private final int MAX_SNOWBALLS = 5;
     private volatile AtomicInteger snowballCount = new AtomicInteger(5);
-    private volatile long snowballTimestamp = System.nanoTime();
-    private volatile long timer;
+
+    private final AtomicLong nextSnowball = new AtomicLong(-1);
 
     public Player(Session session, String address, GameMap map, Messenger messenger) {
         this.session = session;
@@ -124,16 +127,23 @@ public class Player implements GameEntity {
                 lastVelocity.set(velocity);
             }
 
-            if (snowballCount.get() < MAX_SNOWBALLS) {
-                long now = System.nanoTime();
-                long delta = now / 1_000_000_000 - snowballTimestamp / 1_000_000_000;
-                timer += delta;
-                snowballTimestamp = now;
+            if (nextSnowball.get() == -1) {
+                if (snowballCount.get() < MAX_SNOWBALLS) {
+                    nextSnowball.compareAndSet(-1, System.currentTimeMillis() + SNOWBALL_COOLDOWN);
+                }
+                return;
+            }
 
-                if (timer > 2 && snowballCount.get() < MAX_SNOWBALLS) {
-                    snowballCount.incrementAndGet();
-                    sendSnowballCount();
-                    timer = 0;
+            long snowballTime = nextSnowball.get();
+
+            if (System.currentTimeMillis() >= snowballTime) {
+                snowballCount.incrementAndGet();
+                sendSnowballCount();
+
+                if (snowballCount.get() < MAX_SNOWBALLS) {
+                    nextSnowball.addAndGet(SNOWBALL_COOLDOWN);
+                } else {
+                    nextSnowball.set(-1);
                 }
             }
         });
@@ -150,6 +160,9 @@ public class Player implements GameEntity {
     public void throwSnowball(int pointerX, int pointerY) {
         if (snowballCount.get() > 0) {
             snowballCount.decrementAndGet();
+
+            nextSnowball.compareAndSet(-1, System.currentTimeMillis() + SNOWBALL_COOLDOWN);
+
             new Snowball(executor, messenger, map, GROUP_INDEX, this, pointerX, pointerY);
         }
         sendSnowballCount();
