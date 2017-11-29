@@ -124,18 +124,28 @@ public class Player implements GameEntity {
                 lastVelocity.set(velocity);
             }
 
-            if (snowballCount.get() < MAX_SNOWBALLS) {
-                long now = System.nanoTime();
-                long delta = now / 1_000_000_000 - snowballTimestamp / 1_000_000_000;
-                timer += delta;
-                snowballTimestamp = now;
+            long now = System.nanoTime();
+            long delta = now / 1_000_000_000 - snowballTimestamp / 1_000_000_000;
+            timer += delta;
+            snowballTimestamp = now;
 
-                if (timer > 1) {
-                    setSnowballCount(1);
-                    timer = 0;
-                }
+            if (timer > 2 && snowballCount.get() < MAX_SNOWBALLS) {
+                snowballCount.incrementAndGet();
+                sendSnowballCount();
+                timer = 0;
             }
         });
+
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000L);
+                } catch (Exception e) {
+                    break;
+                }
+                LOGGER.info("Snowball count = {}", snowballCount);
+            }
+        }).start();
     }
 
     public void move(int xDirection, int yDirection) {
@@ -147,20 +157,21 @@ public class Player implements GameEntity {
     }
 
     public void throwSnowball(int pointerX, int pointerY) {
-        setSnowballCount(-1);
         if (snowballCount.get() > 0) {
+            snowballCount.decrementAndGet();
             new Snowball(executor, messenger, map, GROUP_INDEX, this, pointerX, pointerY);
         }
+        sendSnowballCount();
     }
 
-    private void setSnowballCount(int delta) {
-        if (snowballCount.get() == 0 && delta == -1) {
-            return;
-        }
-        snowballCount.addAndGet(delta);
-        executor.submitOnce(() -> {
+    private void sendSnowballCount() {
+        sendSnowballCount(() -> {
             messenger.sendMessage(new SnowballCount(snowballCount.get()));
         });
+    }
+
+    private void sendSnowballCount(Runnable runnable) {
+        executor.submitOnce(runnable);
     }
 
     public void disconnect() {
