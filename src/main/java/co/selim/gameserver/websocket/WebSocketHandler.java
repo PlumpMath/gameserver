@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +53,7 @@ public class WebSocketHandler {
         LOGGER.info(session.getRemoteAddress()
                 .getHostString() + " disconnected");
         MESSENGERS.remove(session)
-                .removeSession(session);
+                .removeFromBroadcastList();
         PLAYERS.remove(session)
                 .disconnect();
     }

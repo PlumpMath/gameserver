@@ -68,8 +68,8 @@ public class WebSocketMessenger implements Messenger {
                 .forEach(messenger -> messenger.sendMessage(obj));
     }
 
-    public void removeSession(Session s) {
-        ALL_MESSENGERS.remove(s);
+    public void removeFromBroadcastList() {
+        ALL_MESSENGERS.remove(this);
     }
 
     private Session getSession() {
