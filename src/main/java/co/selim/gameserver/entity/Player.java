@@ -124,28 +124,19 @@ public class Player implements GameEntity {
                 lastVelocity.set(velocity);
             }
 
-            long now = System.nanoTime();
-            long delta = now / 1_000_000_000 - snowballTimestamp / 1_000_000_000;
-            timer += delta;
-            snowballTimestamp = now;
+            if (snowballCount.get() < MAX_SNOWBALLS) {
+                long now = System.nanoTime();
+                long delta = now / 1_000_000_000 - snowballTimestamp / 1_000_000_000;
+                timer += delta;
+                snowballTimestamp = now;
 
-            if (timer > 2 && snowballCount.get() < MAX_SNOWBALLS) {
-                snowballCount.incrementAndGet();
-                sendSnowballCount();
-                timer = 0;
+                if (timer > 2 && snowballCount.get() < MAX_SNOWBALLS) {
+                    snowballCount.incrementAndGet();
+                    sendSnowballCount();
+                    timer = 0;
+                }
             }
         });
-
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000L);
-                } catch (Exception e) {
-                    break;
-                }
-                LOGGER.info("Snowball count = {}", snowballCount);
-            }
-        }).start();
     }
 
     public void move(int xDirection, int yDirection) {
@@ -165,13 +156,10 @@ public class Player implements GameEntity {
     }
 
     private void sendSnowballCount() {
-        sendSnowballCount(() -> {
+        LOGGER.info("Sending snowballCount {}", snowballCount.get());
+        executor.submitOnce(() -> {
             messenger.sendMessage(new SnowballCount(snowballCount.get()));
         });
-    }
-
-    private void sendSnowballCount(Runnable runnable) {
-        executor.submitOnce(runnable);
     }
 
     public void disconnect() {
