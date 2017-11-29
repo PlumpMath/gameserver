@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -70,10 +70,10 @@ public class WebSocketHandler {
                 .get("type")
                 .getAsString();
 
-        co.selim.gameserver.handlers.GameHandler handler = HANDLERS.get(messageType);
-        if (Objects.nonNull(handler)) {
-            handler.handle(player, message);
-        }
+        Optional.ofNullable(HANDLERS.get(messageType))
+                .ifPresent(handler -> {
+                    handler.handle(player, message);
+                });
     }
 
     public static Collection<Player> getAllPlayers() {

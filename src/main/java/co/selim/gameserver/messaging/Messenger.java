@@ -1,7 +1,5 @@
 package co.selim.gameserver.messaging;
 
-import co.selim.gameserver.entity.Player;
-
 public interface Messenger {
     void sendMessage(Object obj);
 
