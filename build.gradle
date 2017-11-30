@@ -16,7 +16,6 @@ dependencies {
     compile "com.sparkjava:spark-core:2.7.0"
     compile "com.google.code.gson:gson:2.8.2"
     compile "org.slf4j:slf4j-simple:1.7.25"
-    compile "org.slf4j:slf4j-simple:1.7.25"
     compile "com.badlogicgames.gdx:gdx-box2d:1.9.7"
     compile "com.badlogicgames.gdx:gdx-box2d-platform:1.9.7:natives-desktop"
 }
