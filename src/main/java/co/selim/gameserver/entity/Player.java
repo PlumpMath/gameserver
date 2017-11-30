@@ -73,7 +73,7 @@ public class Player implements GameEntity {
         BodyDef bodyDef = new BodyDef();
         bodyDef.position.set(x, y);
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        float halfSize = 24;
+        float halfSize = 12;
         CircleShape circleShape = new CircleShape();
         circleShape.setRadius(halfSize);
         FixtureDef fixtureDef = new FixtureDef();
