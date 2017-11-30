@@ -239,6 +239,15 @@ public class Player implements GameEntity {
         }
     }
 
+    @Override
+    public boolean shouldCollide(GameEntity other) {
+        if (other instanceof Player) {
+            return false;
+        }
+
+        return true;
+    }
+
     public String getId() {
         return id;
     }

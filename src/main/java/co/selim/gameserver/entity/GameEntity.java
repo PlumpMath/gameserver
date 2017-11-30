@@ -10,4 +10,8 @@ public interface GameEntity {
     void collided(GameEntity other);
 
     Type getType();
+
+    default boolean shouldCollide(GameEntity other) {
+        return true;
+    }
 }

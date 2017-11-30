@@ -1,7 +1,9 @@
 package co.selim.gameserver.model;
 
 import co.selim.gameserver.entity.GameEntity;
+import co.selim.gameserver.entity.Player;
 import co.selim.gameserver.entity.Tree;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -37,10 +39,10 @@ public class GameMap {
 
         float mapWidth = MAP_SIZE.x;
         float mapHeight = MAP_SIZE.y;
-        createWall(0, 0, 0, mapHeight);
-        createWall(0, 0, mapWidth, 0);
-        createWall(mapWidth, 0, mapWidth, mapHeight);
-        createWall(0, mapHeight, mapWidth, mapHeight);
+        createWall(mapWidth, 0, mapWidth, 50); // top
+        createWall(0, mapHeight, 50, mapHeight); // left
+        createWall(mapWidth, mapHeight + 50, mapWidth, 50); // bottom
+        createWall(mapWidth + 50, mapHeight, 50, mapHeight); // right
         createTree(mapWidth * 0.25f, mapHeight * 0.33f, Tree.TreeType.PINALE);
         createTree(mapWidth * 0.85f, mapHeight * 0.5f, Tree.TreeType.BROADLEAF);
         createTree(mapWidth * 0.5f, mapHeight * 0.75f, Tree.TreeType.BROADLEAF);
@@ -67,7 +69,16 @@ public class GameMap {
 
             @Override
             public void preSolve(Contact contact, Manifold oldManifold) {
+                GameEntity a = (GameEntity) contact.getFixtureA()
+                        .getBody()
+                        .getUserData();
+                GameEntity b = (GameEntity) contact.getFixtureB()
+                        .getBody()
+                        .getUserData();
 
+                if (!(a.shouldCollide(b) && b.shouldCollide(a))) {
+                    contact.setEnabled(false);
+                }
             }
 
             @Override
@@ -130,10 +141,10 @@ public class GameMap {
         return new HashSet<>(trees);
     }
 
-    private void createWall(float x, float y, float w, float h) {
+    private void createWall(float rightX, float bottomY, float w, float h) {
         // TODO: fix wall coordinates
         BodyDef bodyDef = new BodyDef();
-        bodyDef.position.set(x - w / 2, y - h / 2);
+        bodyDef.position.set(rightX - w / 2, bottomY - h / 2);
         bodyDef.type = BodyDef.BodyType.StaticBody;
         PolygonShape edgeShape = new PolygonShape();
         edgeShape.setAsBox(w / 2, h / 2);
