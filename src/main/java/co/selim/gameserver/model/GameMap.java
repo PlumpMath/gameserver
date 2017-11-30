@@ -22,8 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 public class GameMap {
-    public static final Vector2 MAP_SIZE = new Vector2(1024, 768);
-    public static final float PPM = 8;
+    public static final Vector2 MAP_SIZE = new Vector2(1600, 900);
     private static final Logger LOGGER = LoggerFactory.getLogger(GameMap.class);
 
     private final World world;

@@ -89,7 +89,7 @@ public class Player implements GameEntity {
         });
         this.map = map;
 
-        this.moveDistance = 15;
+        this.moveDistance = 120;
 
         executor.submitConnectionBoundTask(() -> {
             Vector2 velocity = new Vector2();
@@ -99,12 +99,12 @@ public class Player implements GameEntity {
             }
 
             if (movingX) {
-                velocity.x = xDirection * moveDistance * GameMap.PPM;
+                velocity.x = xDirection * moveDistance;
             } else {
                 velocity.x = 0;
             }
             if (movingY) {
-                velocity.y = yDirection * moveDistance * GameMap.PPM;
+                velocity.y = yDirection * moveDistance;
             } else {
                 velocity.y = 0;
             }
@@ -117,7 +117,7 @@ public class Player implements GameEntity {
             }
 
             body.setLinearVelocity(velocity);
-            moveDistance = 15;
+            moveDistance = 120;
 
             float angle = MathUtils.atan2(velocity.y, velocity.x);
 

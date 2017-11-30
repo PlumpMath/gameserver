@@ -25,7 +25,7 @@ public class Snowball implements GameEntity {
     private final GameMap map;
     private final Player myPlayer;
 
-    private float moveDistance = 45;
+    private float moveDistance = 360;
     private float angle;
 
     private Body body;
@@ -63,8 +63,8 @@ public class Snowball implements GameEntity {
         this.angle = MathUtils.atan2(pointerY - myPlayer.getPosition().y, pointerX - myPlayer
                 .getPosition().x);
 
-        Vector2 velocity = new Vector2(MathUtils.cos(angle) * moveDistance * GameMap.PPM, MathUtils.sin(angle)
-                * moveDistance * GameMap.PPM);
+        Vector2 velocity = new Vector2(MathUtils.cos(angle) * moveDistance, MathUtils.sin(angle)
+                * moveDistance);
         body.setLinearVelocity(velocity);
 
         executor.submitOnce(() -> {
