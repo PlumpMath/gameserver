@@ -25,7 +25,7 @@ public class Snowball implements GameEntity {
     private final GameMap map;
     private final Player myPlayer;
 
-    private float moveDistance = 360;
+    private float moveDistance = 720;
     private float angle;
 
     private Body body;
