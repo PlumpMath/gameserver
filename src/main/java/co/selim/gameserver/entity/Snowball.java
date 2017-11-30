@@ -32,6 +32,7 @@ public class Snowball implements GameEntity {
     private volatile boolean destroyed;
 
     private final String id;
+    private final Vector2 startPosition;
 
     public Snowball(GameExecutor executor, Messenger messenger, GameMap map, short groupIndex,
                     Player myPlayer, int pointerX, int pointerY) {
@@ -39,7 +40,8 @@ public class Snowball implements GameEntity {
         this.myPlayer = myPlayer;
 
         BodyDef bodyDef = new BodyDef();
-        bodyDef.position.set(myPlayer.getPosition().x, myPlayer.getPosition().y);
+        startPosition = new Vector2(myPlayer.getPosition());
+        bodyDef.position.set(startPosition);
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         CircleShape circleShape = new CircleShape();
         circleShape.setRadius(8);
@@ -92,6 +94,28 @@ public class Snowball implements GameEntity {
 
     @Override
     public void collided(GameEntity other) {
+        if (other.getType() == Type.PLAYER) {
+            Vector2 endPosition = new Vector2(body.getPosition());
+
+            float distance = (float) Math.sqrt(Math.pow(startPosition.x - endPosition.x, 2)
+                    +
+                    Math.pow(startPosition.y - endPosition.y, 2));
+            float minDistance = 100;
+            float maxDistance = 400 - minDistance;
+            float distancePercentage = (distance - minDistance) / maxDistance;
+            int scoreDelta = Math.round(Math.max(0, Math.min(distancePercentage, 1)) * 10);
+
+            Player player = (Player) other;
+            player.sendMessage(new PlayerScored(player.getId(), -scoreDelta));
+            player.sendMessage(new PlayerScored(myPlayer.getId(), scoreDelta));
+            player.changeScore(scoreDelta);
+            player.broadCastMessage(new PlayerScoreChanged(player.getId(), player.getScore()));
+            myPlayer.sendMessage(new PlayerScored(myPlayer.getId(), scoreDelta));
+            myPlayer.sendMessage(new PlayerScored(player.getId(), -scoreDelta));
+            myPlayer.changeScore(scoreDelta);
+            myPlayer.broadCastMessage(new PlayerScoreChanged(myPlayer.getId(), myPlayer.getScore
+                    ()));
+        }
         if (other.getType() == Type.SNOWBALL) {
             // for the unlikely event that we collide with a sibling snowball
             if (((Snowball) other).myPlayer.getGroupIndex() != myPlayer.getGroupIndex()) {
@@ -104,19 +128,6 @@ public class Snowball implements GameEntity {
             }
         } else {
             destroy();
-        }
-        if (other.getType() == Type.PLAYER) {
-            LOGGER.info("Player was hit by snowball");
-            Player player = (Player) other;
-            player.sendMessage(new PlayerScored(player.getId(), PlayerScored.ScoreType.GOT_HIT));
-            player.sendMessage(new PlayerScored(myPlayer.getId(), PlayerScored.ScoreType.HIT));
-            player.changeScore(PlayerScored.ScoreType.GOT_HIT.getDelta());
-            player.broadCastMessage(new PlayerScoreChanged(player.getId(), player.getScore()));
-            myPlayer.sendMessage(new PlayerScored(myPlayer.getId(), PlayerScored.ScoreType.HIT));
-            myPlayer.sendMessage(new PlayerScored(player.getId(), PlayerScored.ScoreType.GOT_HIT));
-            myPlayer.changeScore(PlayerScored.ScoreType.HIT.getDelta());
-            myPlayer.broadCastMessage(new PlayerScoreChanged(myPlayer.getId(), myPlayer.getScore
-                    ()));
         }
     }
 

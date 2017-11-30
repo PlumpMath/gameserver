@@ -11,8 +11,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import org.eclipse.jetty.websocket.api.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +74,10 @@ public class Player implements GameEntity {
         bodyDef.position.set(x, y);
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         float halfSize = 24;
-        PolygonShape edgeShape = new PolygonShape();
-        edgeShape.setAsBox(halfSize, halfSize);
+        CircleShape circleShape = new CircleShape();
+        circleShape.setRadius(halfSize);
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = edgeShape;
+        fixtureDef.shape = circleShape;
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0;
         fixtureDef.restitution = 0;
@@ -243,8 +243,8 @@ public class Player implements GameEntity {
         return id;
     }
 
-    public void changeScore(int score) {
-        this.score += score;
+    public void changeScore(int delta) {
+        this.score += delta;
     }
 
     public void setGameStarted() {

@@ -4,26 +4,9 @@ public class PlayerScored {
     private final String type = "playerScored";
     private final String playerId;
     private final int scoreDelta;
-    private final transient int DELTA = 10;
 
-    public PlayerScored(String playerId, ScoreType scoreType) {
+    public PlayerScored(String playerId, int scoreDelta) {
         this.playerId = playerId;
-        this.scoreDelta = scoreType.getDelta();
-    }
-
-    public enum ScoreType {
-        HIT {
-            @Override
-            public int getDelta() {
-                return 10;
-            }
-        }, GOT_HIT {
-            @Override
-            public int getDelta() {
-                return -10;
-            }
-        };
-
-        public abstract int getDelta();
+        this.scoreDelta = scoreDelta;
     }
 }
