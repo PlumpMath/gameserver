@@ -5,6 +5,7 @@ import co.selim.gameserver.model.GameMap;
 import co.selim.gameserver.model.dto.incoming.ConnectionRequest;
 import co.selim.gameserver.model.dto.outgoing.GameStarted;
 import co.selim.gameserver.model.dto.outgoing.PlayerConnected;
+import co.selim.gameserver.model.dto.outgoing.PlayerStopped;
 import co.selim.gameserver.websocket.WebSocketHandler;
 import com.badlogic.gdx.math.Vector2;
 import com.google.gson.Gson;
@@ -25,5 +26,6 @@ public class ConnectionHandler implements GameHandler {
         Vector2 position = player.getPosition();
         player.broadCastToOthers(new PlayerConnected(player.getId(), position.x, position.y,
                 player.getSkin(), player.getName()));
+        player.broadCastMessage(new PlayerStopped(position.x, position.y, player.getId()));
     }
 }
