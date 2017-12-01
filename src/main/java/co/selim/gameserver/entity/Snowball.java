@@ -107,7 +107,7 @@ public class Snowball implements GameEntity {
             Player player = (Player) other;
             player.sendMessage(new PlayerScored(player.getId(), -scoreDelta));
             player.sendMessage(new PlayerScored(myPlayer.getId(), scoreDelta));
-            player.changeScore(scoreDelta);
+            player.changeScore(-scoreDelta);
             player.broadCastMessage(new PlayerScoreChanged(player.getId(), player.getScore()));
             myPlayer.sendMessage(new PlayerScored(myPlayer.getId(), scoreDelta));
             myPlayer.sendMessage(new PlayerScored(player.getId(), -scoreDelta));
