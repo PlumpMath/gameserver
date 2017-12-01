@@ -1,9 +1,14 @@
 package co.selim.gameserver.model;
 
-import co.selim.gameserver.entity.GameEntity;
-import co.selim.gameserver.entity.Player;
-import co.selim.gameserver.entity.Tree;
-import com.badlogic.gdx.math.Rectangle;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -14,14 +19,9 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
+import co.selim.gameserver.entity.GameEntity;
+import co.selim.gameserver.entity.Tree;
 
 public class GameMap {
     public static final Vector2 MAP_SIZE = new Vector2(1600, 900);
@@ -103,7 +103,7 @@ public class GameMap {
                     lock.unlock();
                 }
                 try {
-                    Thread.sleep(1L);
+                    Thread.sleep(10L);
                 } catch (Exception e) {
                     break;
                 }
