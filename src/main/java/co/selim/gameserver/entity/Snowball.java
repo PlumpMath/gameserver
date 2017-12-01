@@ -16,12 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
-
-import static co.selim.gameserver.model.GameMap.MAP_SIZE;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Snowball implements GameEntity {
     private static final Logger LOGGER = LoggerFactory.getLogger(Snowball.class);
 
+    private final Messenger messenger;
     private final GameMap map;
     private final Player myPlayer;
 
@@ -29,13 +29,14 @@ public class Snowball implements GameEntity {
     private float angle;
 
     private Body body;
-    private volatile boolean destroyed;
+    private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
     private final String id;
     private final Vector2 startPosition;
 
     public Snowball(GameExecutor executor, Messenger messenger, GameMap map, short groupIndex,
                     Player myPlayer, int pointerX, int pointerY) {
+        this.messenger = messenger;
         this.map = map;
         this.myPlayer = myPlayer;
 
@@ -71,23 +72,21 @@ public class Snowball implements GameEntity {
             Vector2 snowballPosition = body.getPosition();
             messenger.broadCast(new SnowballCoordinates(snowballPosition.x, snowballPosition.y, angle, moveDistance, false, id));
         });
-
-        executor.submit(() -> {
-            Vector2 pos = body.getPosition();
-            if (destroyed || (!destroyed && (pos.x < 0 || pos.x > MAP_SIZE.x || pos.y < 0 || pos
-                    .y > MAP_SIZE.y))) {
-                destroy();
-                LOGGER.info("Destroyed snowball with ID {}", id);
-                Vector2 snowballPosition = body.getPosition();
-                messenger.broadCast(new SnowballCoordinates(snowballPosition.x, snowballPosition.y, angle, moveDistance, true, id));
-            }
-        }, () -> destroyed);
     }
 
     @Override
     public void destroy() {
-        if (!destroyed) {
-            destroyed = true;
+        if (destroyed.compareAndSet(false, true)) {
+            LOGGER.info("Destroyed snowball with ID {}", id);
+            Vector2 snowballPosition = body.getPosition();
+            messenger.broadCast(new SnowballCoordinates(
+                    snowballPosition.x,
+                    snowballPosition.y,
+                    angle,
+                    moveDistance,
+                    true,
+                    id));
+
             map.destroyBody(body);
         }
     }

@@ -1,27 +1,17 @@
 package co.selim.gameserver.model;
 
+import co.selim.gameserver.entity.GameEntity;
+import co.selim.gameserver.entity.Tree;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.ContactImpulse;
-import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.Manifold;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
-
-import co.selim.gameserver.entity.GameEntity;
-import co.selim.gameserver.entity.Tree;
 
 public class GameMap {
     public static final Vector2 MAP_SIZE = new Vector2(1600, 900);
@@ -31,7 +21,6 @@ public class GameMap {
     private final ReentrantLock lock = new ReentrantLock();
     private final Set<Body> bodiesToRemove = ConcurrentHashMap.newKeySet();
     private static final Set<Tree> trees = new HashSet<>();
-    private volatile long lastUpdate = System.nanoTime();
 
     public GameMap() {
         Vector2 gravity = new Vector2(0, 0);
@@ -87,23 +76,32 @@ public class GameMap {
             }
         });
 
-        new Thread(() -> {
-            while (true) {
-                try {
-                    lock.lock();
-                    long now = System.nanoTime();
-                    long delta = now - lastUpdate;
-                    float deltaS = delta / 1_000_000_000f;
-                    lastUpdate = now;
-                    world.step(deltaS, 6, 3);
+        float stepSize = (float) 0.002; // libgdx constraints velocity by "max 2 units per time step"
+        long stepSizeNano = 2_000_000;
 
-                    bodiesToRemove.forEach(world::destroyBody);
-                    bodiesToRemove.clear();
-                } finally {
-                    lock.unlock();
+        new Thread(() -> {
+            long nextStep = System.nanoTime();
+
+            while (true) {
+                long now = System.nanoTime();
+                while (now >= nextStep) {
+                    try {
+                        lock.lock();
+
+                        nextStep += stepSizeNano;
+
+                        world.step(stepSize, 6, 3);
+
+                        bodiesToRemove.forEach(world::destroyBody);
+                        bodiesToRemove.clear();
+
+                    } finally {
+                        lock.unlock();
+                    }
                 }
+
                 try {
-                    Thread.sleep(10L);
+                    Thread.sleep(2L);
                 } catch (Exception e) {
                     break;
                 }

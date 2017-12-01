@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public final class GameExecutor {
@@ -95,7 +94,7 @@ public final class GameExecutor {
         GameTask gameTask = new GameTask() {
             @Override
             public boolean isDone() {
-                return false;
+                return !connected;
             }
 
             @Override

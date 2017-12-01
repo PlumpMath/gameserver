@@ -170,18 +170,14 @@ public class Player implements GameEntity {
 
     private void sendSnowballCount() {
         LOGGER.info("Sending snowballCount {}", snowballCount.get());
-        executor.submitOnce(() -> {
-            messenger.sendMessage(new SnowballCount(snowballCount.get()));
-        });
+        messenger.sendMessage(new SnowballCount(snowballCount.get()));
     }
 
     public void disconnect() {
-        executor.submitOnce(() -> {
-            messenger.broadCastToOthers(new PlayerDisconnected(getId()));
-            connected = false;
-            destroy();
-            executor.stop();
-        });
+        messenger.broadCastToOthers(new PlayerDisconnected(getId()));
+        connected = false;
+        destroy();
+        executor.stop();
     }
 
     public Vector2 getPosition() {
@@ -205,21 +201,15 @@ public class Player implements GameEntity {
     }
 
     public void broadCastMessage(Object obj) {
-        executor.submitOnce(() -> {
-            messenger.broadCast(obj);
-        });
+        messenger.broadCast(obj);
     }
 
     public void broadCastToOthers(Object obj) {
-        executor.submitOnce(() -> {
-            messenger.broadCastToOthers(obj);
-        });
+        messenger.broadCastToOthers(obj);
     }
 
     public void sendMessage(Object obj) {
-        executor.submitOnce(() -> {
-            messenger.sendMessage(obj);
-        });
+        messenger.sendMessage(obj);
     }
 
     @Override
@@ -232,10 +222,8 @@ public class Player implements GameEntity {
         if (other.getType()
                 .equals(Type.WALL) && (!movingX && !movingY)) {
             LOGGER.info("Player collided with obstacle and not moving diagonally, sending stop");
-            executor.submitOnce(() -> {
-                Vector2 bodyPos = body.getPosition();
-                messenger.broadCast(new PlayerStopped(bodyPos.x, bodyPos.y, getId()));
-            });
+            Vector2 bodyPos = body.getPosition();
+            messenger.broadCast(new PlayerStopped(bodyPos.x, bodyPos.y, getId()));
         }
     }
 
