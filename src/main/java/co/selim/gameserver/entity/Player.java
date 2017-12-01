@@ -26,7 +26,7 @@ import static co.selim.gameserver.model.GameMap.MAP_SIZE;
 public class Player implements GameEntity {
     private final Logger LOGGER = LoggerFactory.getLogger(Player.class);
 
-    private static final int SNOWBALL_COOLDOWN = 1000;
+    private static final int SNOWBALL_COOLDOWN = 500;
 
     private static short nCount;
     private final GameExecutor executor;
